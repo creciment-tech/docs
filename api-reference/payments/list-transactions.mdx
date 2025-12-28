@@ -64,13 +64,13 @@ GET /api/payments/list-transactions
 
 <RequestExample>
 ```bash cURL
-curl "https://api.chidori.africa/api/payments/list-transactions?page=1&limit=20" \
+curl "https://api.chidori.africa/enterprise-service/api/payments/list-transactions?page=1&limit=20" \
   -H "X-API-Key: sk_live_xxx.yyy"
 ```
 
 ```javascript JavaScript
 const response = await fetch(
-  'https://api.chidori.africa/api/payments/list-transactions?page=1&limit=20',
+  'https://api.chidori.africa/enterprise-service/api/payments/list-transactions?page=1&limit=20',
   {
     headers: {
       'X-API-Key': 'sk_live_xxx.yyy'
@@ -85,7 +85,7 @@ const data = await response.json();
 import requests
 
 response = requests.get(
-    'https://api.chidori.africa/api/payments/list-transactions',
+    'https://api.chidori.africa/enterprise-service/api/payments/list-transactions',
     params={'page': 1, 'limit': 20},
     headers={'X-API-Key': 'sk_live_xxx.yyy'}
 )
@@ -148,7 +148,7 @@ data = response.json()
       
       while (hasMore) {
         const response = await fetch(
-          `https://api.chidori.africa/api/payments/list-transactions?page=${page}&limit=100`,
+          `https://api.chidori.africa/enterprise-service/api/payments/list-transactions?page=${page}&limit=100`,
           { headers: { 'X-API-Key': apiKey } }
         );
         const { data } = await response.json();
@@ -178,7 +178,7 @@ data = response.json()
       
       while (hasMore) {
         const response = await fetch(
-          `https://api.chidori.africa/api/payments/list-transactions?page=${page}&limit=100`,
+          `https://api.chidori.africa/enterprise-service/api/payments/list-transactions?page=${page}&limit=100`,
           { headers: { 'X-API-Key': apiKey } }
         );
         const { data } = await response.json();

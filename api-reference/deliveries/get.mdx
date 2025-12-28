@@ -59,19 +59,19 @@ Provide either `id` OR `trackingId`:
 
 <RequestExample>
 ```bash cURL (by ID)
-curl "https://api.chidori.africa/api/deliveries/get?id=abc123-def456-ghi789" \
+curl "https://api.chidori.africa/enterprise-service/api/deliveries/get?id=abc123-def456-ghi789" \
   -H "X-API-Key: sk_live_xxx.yyy"
 ```
 
 ```bash cURL (by trackingId)
-curl "https://api.chidori.africa/api/deliveries/get?trackingId=CHI-ABC123" \
+curl "https://api.chidori.africa/enterprise-service/api/deliveries/get?trackingId=CHI-ABC123" \
   -H "X-API-Key: sk_live_xxx.yyy"
 ```
 
 ```javascript JavaScript
 // By ID
 const response = await fetch(
-  'https://api.chidori.africa/api/deliveries/get?id=abc123-def456-ghi789',
+  'https://api.chidori.africa/enterprise-service/api/deliveries/get?id=abc123-def456-ghi789',
   {
     headers: {
       'X-API-Key': 'sk_live_xxx.yyy'
@@ -87,7 +87,7 @@ import requests
 
 # By tracking ID
 response = requests.get(
-    'https://api.chidori.africa/api/deliveries/get',
+    'https://api.chidori.africa/enterprise-service/api/deliveries/get',
     params={'trackingId': 'CHI-ABC123'},
     headers={'X-API-Key': 'sk_live_xxx.yyy'}
 )
@@ -171,7 +171,7 @@ data = response.json()
     ```javascript
     async function getDeliveryStatus(trackingId) {
       const response = await fetch(
-        `https://api.chidori.africa/api/deliveries/get?trackingId=${trackingId}`,
+        `https://api.chidori.africa/enterprise-service/api/deliveries/get?trackingId=${trackingId}`,
         { headers: { 'X-API-Key': apiKey } }
       );
       const { data } = await response.json();
@@ -190,7 +190,7 @@ data = response.json()
     ```javascript
     async function syncDeliveryStatus(deliveryId) {
       const response = await fetch(
-        `https://api.chidori.africa/api/deliveries/get?id=${deliveryId}`,
+        `https://api.chidori.africa/enterprise-service/api/deliveries/get?id=${deliveryId}`,
         { headers: { 'X-API-Key': apiKey } }
       );
       const { data } = await response.json();

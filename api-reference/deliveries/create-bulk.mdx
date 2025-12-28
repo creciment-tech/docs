@@ -101,7 +101,7 @@ You must provide either `bulkId` OR `tempDeliveryIds`:
 
 <RequestExample>
 ```bash cURL
-curl -X POST https://api.chidori.africa/api/deliveries/create-bulk \
+curl -X POST https://api.chidori.africa/enterprise-service/api/deliveries/create-bulk \
   -H "X-API-Key: sk_live_xxx.yyy" \
   -H "Content-Type: application/json" \
   -d '{
@@ -112,7 +112,7 @@ curl -X POST https://api.chidori.africa/api/deliveries/create-bulk \
 ```
 
 ```javascript JavaScript
-const response = await fetch('https://api.chidori.africa/api/deliveries/create-bulk', {
+const response = await fetch('https://api.chidori.africa/enterprise-service/api/deliveries/create-bulk', {
   method: 'POST',
   headers: {
     'X-API-Key': 'sk_live_xxx.yyy',
@@ -132,7 +132,7 @@ const data = await response.json();
 ### Using tempDeliveryIds
 
 ```bash
-curl -X POST https://api.chidori.africa/api/deliveries/create-bulk \
+curl -X POST https://api.chidori.africa/enterprise-service/api/deliveries/create-bulk \
   -H "X-API-Key: sk_live_xxx.yyy" \
   -H "Content-Type: application/json" \
   -d '{
@@ -191,7 +191,7 @@ curl -X POST https://api.chidori.africa/api/deliveries/create-bulk \
 When paying for bulk deliveries, you only need to make one payment call with any `deliveryId` from the bulk. The system automatically calculates and charges the total for all deliveries.
 
 ```bash
-curl -X POST https://api.chidori.africa/api/payments/charge \
+curl -X POST https://api.chidori.africa/enterprise-service/api/payments/charge \
   -H "X-API-Key: sk_live_xxx.yyy" \
   -H "Content-Type: application/json" \
   -d '{

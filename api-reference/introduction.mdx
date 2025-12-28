@@ -12,13 +12,13 @@ The Chidori Enterprise API enables you to programmatically create deliveries, pr
 <Tabs>
   <Tab title="Sandbox">
     ```
-    https://sandbox.chidori.africa
+    https://sandbox.chidori.africa/enterprise-service
     ```
     Use for development and testing. No real deliveries or payments.
   </Tab>
   <Tab title="Live">
     ```
-    https://api.chidori.africa
+    https://api.chidori.africa/enterprise-service
     ```
     Use for production. Real deliveries and payments.
   </Tab>
@@ -29,7 +29,7 @@ The Chidori Enterprise API enables you to programmatically create deliveries, pr
 All API requests require authentication via the `X-API-Key` header:
 
 ```bash
-curl https://api.chidori.africa/api/deliveries/list \
+curl https://api.chidori.africa/enterprise-service/api/deliveries/list \
   -H "X-API-Key: sk_live_xxx.yyy"
 ```
 
@@ -42,7 +42,7 @@ curl https://api.chidori.africa/api/deliveries/list \
 All POST requests should include a JSON body with the `Content-Type: application/json` header:
 
 ```bash
-curl -X POST https://api.chidori.africa/api/pricing/single \
+curl -X POST https://api.chidori.africa/enterprise-service/api/pricing/single \
   -H "X-API-Key: sk_live_xxx.yyy" \
   -H "Content-Type: application/json" \
   -d '{"pickup": {"lat": 6.5244, "lon": 3.3792}, "destination": {"lat": 6.4654, "lon": 3.4064}}'

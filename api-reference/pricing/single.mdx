@@ -100,7 +100,7 @@ POST /api/pricing/single
 
 <RequestExample>
 ```bash cURL
-curl -X POST https://api.chidori.africa/api/pricing/single \
+curl -X POST https://api.chidori.africa/enterprise-service/api/pricing/single \
   -H "X-API-Key: sk_live_xxx.yyy" \
   -H "Content-Type: application/json" \
   -d '{
@@ -116,7 +116,7 @@ curl -X POST https://api.chidori.africa/api/pricing/single \
 ```
 
 ```javascript JavaScript
-const response = await fetch('https://api.chidori.africa/api/pricing/single', {
+const response = await fetch('https://api.chidori.africa/enterprise-service/api/pricing/single', {
   method: 'POST',
   headers: {
     'X-API-Key': 'sk_live_xxx.yyy',
@@ -135,7 +135,7 @@ const data = await response.json();
 import requests
 
 response = requests.post(
-    'https://api.chidori.africa/api/pricing/single',
+    'https://api.chidori.africa/enterprise-service/api/pricing/single',
     headers={
         'X-API-Key': 'sk_live_xxx.yyy',
         'Content-Type': 'application/json'

@@ -59,12 +59,12 @@ Include your API key in the `X-API-Key` header for all API requests:
 
 <CodeGroup>
 ```bash cURL
-curl https://api.chidori.africa/api/deliveries/list \
+curl https://api.chidori.africa/enterprise-service/api/deliveries/list \
   -H "X-API-Key: sk_live_xxx.yyy"
 ```
 
 ```javascript JavaScript
-const response = await fetch('https://api.chidori.africa/api/deliveries/list', {
+const response = await fetch('https://api.chidori.africa/enterprise-service/api/deliveries/list', {
   headers: {
     'X-API-Key': 'sk_live_xxx.yyy'
   }
@@ -75,7 +75,7 @@ const response = await fetch('https://api.chidori.africa/api/deliveries/list', {
 import requests
 
 response = requests.get(
-    'https://api.chidori.africa/api/deliveries/list',
+    'https://api.chidori.africa/enterprise-service/api/deliveries/list',
     headers={'X-API-Key': 'sk_live_xxx.yyy'}
 )
 ```

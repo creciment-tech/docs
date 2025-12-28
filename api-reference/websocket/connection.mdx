@@ -19,7 +19,7 @@ Connect to the Chidori WebSocket server to receive real-time driver location upd
 
 | Property | Value |
 |----------|-------|
-| **URL** | `https://api.chidori.africa` |
+| **URL** | `https://api.chidori.africa/enterprise-service` |
 | **Path** | `/enterprise-socket` |
 | **Protocol** | Socket.IO |
 
@@ -28,7 +28,7 @@ Connect to the Chidori WebSocket server to receive real-time driver location upd
 Pass your **live** API key in the `auth` object when connecting:
 
 ```javascript
-const socket = io('https://api.chidori.africa', {
+const socket = io('https://api.chidori.africa/enterprise-service', {
   path: '/enterprise-socket',
   auth: {
     apiKey: 'sk_live_xxx.yyy'
@@ -39,7 +39,7 @@ const socket = io('https://api.chidori.africa', {
 Alternatively, pass it as a query parameter:
 
 ```javascript
-const socket = io('https://api.chidori.africa?apiKey=sk_live_xxx.yyy', {
+const socket = io('https://api.chidori.africa/enterprise-service?apiKey=sk_live_xxx.yyy', {
   path: '/enterprise-socket'
 });
 ```
@@ -77,7 +77,7 @@ You can only subscribe to deliveries that belong to your account. When you subsc
 import { io } from 'socket.io-client';
 
 // Connect to WebSocket
-const socket = io('https://api.chidori.africa', {
+const socket = io('https://api.chidori.africa/enterprise-service', {
   path: '/enterprise-socket',
   auth: {
     apiKey: 'sk_live_xxx.yyy'
@@ -128,7 +128,7 @@ function useDriverLocation(apiKey, deliveryId) {
   useEffect(() => {
     if (!deliveryId) return;
 
-    const socket = io('https://api.chidori.africa', {
+    const socket = io('https://api.chidori.africa/enterprise-service', {
       path: '/enterprise-socket',
       auth: { apiKey }
     });

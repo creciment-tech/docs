@@ -138,7 +138,7 @@
     }
   },
   "api": {
-    "baseUrl": ["https://api.chidori.africa", "https://sandbox.chidori.africa"],
+    "baseUrl": ["https://api.chidori.africa/enterprise-service", "https://sandbox.chidori.africa/enterprise-service"],
     "auth": {
       "method": "key",
       "name": "X-API-Key"

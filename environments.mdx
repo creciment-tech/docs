@@ -11,7 +11,7 @@ Chidori provides two separate environments to help you develop and test your int
 
 | Feature | Sandbox | Live |
 |---------|---------|------|
-| **Base URL** | `https://sandbox.chidori.africa` | `https://api.chidori.africa` |
+| **Base URL** | `https://sandbox.chidori.africa/enterprise-service` | `https://api.chidori.africa/enterprise-service` |
 | **API Key Prefix** | `sk_sandbox_` | `sk_live_` |
 | **Real Deliveries** | No | Yes |
 | **Real Payments** | No (test wallet) | Yes (real wallet) |
@@ -30,7 +30,7 @@ The sandbox environment is designed for development and testing. Use it to:
 ### Sandbox base URL
 
 ```
-https://sandbox.chidori.africa
+https://sandbox.chidori.africa/enterprise-service
 ```
 
 ### Sandbox API keys
@@ -68,7 +68,7 @@ The live environment handles real deliveries with real drivers and real payments
 ### Live base URL
 
 ```
-https://api.chidori.africa
+https://api.chidori.africa/enterprise-service
 ```
 
 ### Live API keys
@@ -118,8 +118,8 @@ To switch between environments, you need to:
 <CodeGroup>
 ```javascript Node.js
 const CHIDORI_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://api.chidori.africa'
-  : 'https://sandbox.chidori.africa';
+  ? 'https://api.chidori.africa/enterprise-service'
+  : 'https://sandbox.chidori.africa/enterprise-service';
 
 const CHIDORI_API_KEY = process.env.NODE_ENV === 'production'
   ? process.env.CHIDORI_LIVE_KEY
@@ -130,9 +130,9 @@ const CHIDORI_API_KEY = process.env.NODE_ENV === 'production'
 import os
 
 CHIDORI_BASE_URL = (
-    'https://api.chidori.africa'
+    'https://api.chidori.africa/enterprise-service'
     if os.environ.get('ENV') == 'production'
-    else 'https://sandbox.chidori.africa'
+    else 'https://sandbox.chidori.africa/enterprise-service'
 )
 
 CHIDORI_API_KEY = (
