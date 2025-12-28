@@ -1,97 +1,92 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Chidori API Documentation"
+description: "Build powerful delivery integrations with the Chidori Enterprise API"
 ---
 
-## Setting up
+## Welcome to Chidori
 
-Get your documentation site up and running in minutes.
+Chidori is a delivery logistics platform that enables you to integrate delivery services directly into your applications. Our Enterprise API provides programmatic access to pricing, delivery creation, payments, and real-time tracking.
 
 <Card
-  title="Start here"
+  title="Get Started"
   icon="rocket"
   href="/quickstart"
   horizontal
 >
-  Follow our three step quickstart guide.
+  Create your first delivery in under 5 minutes.
 </Card>
 
-## Make it yours
+## What you can build
 
-Design a docs site that looks great and empowers your users.
+<CardGroup cols={2}>
+  <Card
+    title="E-commerce Integration"
+    icon="cart-shopping"
+  >
+    Add same-day delivery to your online store with real-time pricing and tracking.
+  </Card>
+  <Card
+    title="Logistics Dashboard"
+    icon="truck"
+  >
+    Build custom dashboards to manage and monitor all your deliveries.
+  </Card>
+  <Card
+    title="Multi-stop Deliveries"
+    icon="route"
+  >
+    Create bulk deliveries with multiple stops from a single pickup location.
+  </Card>
+  <Card
+    title="Real-time Tracking"
+    icon="location-dot"
+  >
+    Track driver locations and delivery status updates via WebSocket.
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
+## Quick links
+
+<CardGroup cols={2}>
   <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
+    title="Quickstart Guide"
+    icon="play"
+    href="/quickstart"
   >
-    Edit your docs locally and preview them in real time.
+    Step-by-step guide to make your first API call.
   </Card>
   <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
+    title="API Reference"
+    icon="code"
     href="/api-reference/introduction"
   >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
-
-## Create beautiful pages
-
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+    Complete reference for all API endpoints.
   </Card>
   <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
+    title="Environments"
+    icon="server"
+    href="/environments"
   >
-    Add sample code to demonstrate how to use your product.
+    Learn about sandbox and live environments.
   </Card>
   <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
+    title="Authentication"
+    icon="key"
+    href="/authentication/api-keys"
   >
-    Display images and other media.
+    Set up API keys and permissions.
   </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+</CardGroup>
 
-## Need inspiration?
+## API Environments
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+Chidori provides two separate environments for development and production:
+
+| Environment | Base URL | Purpose |
+|-------------|----------|---------|
+| **Sandbox** | `https://sandbox.chidori.africa` | Testing and development |
+| **Live** | `https://api.chidori.africa` | Production traffic |
+
+<Tip>
+  Start with the sandbox environment to test your integration without affecting real deliveries or wallet balances.
+</Tip>

@@ -1,0 +1,183 @@
+---
+title: "Permissions"
+description: "Configure granular permissions for your Chidori API keys"
+---
+
+## Overview
+
+Chidori API keys support granular permissions, allowing you to control exactly what each key can do. This follows the principle of least privilege—only grant the permissions your application actually needs.
+
+## Available permissions
+
+| Permission | Description | Required for |
+|------------|-------------|--------------|
+| `pricing:read` | Get delivery price estimates | `/api/pricing/single`, `/api/pricing/bulk` |
+| `delivery:create` | Create new deliveries | `/api/deliveries/create`, `/api/deliveries/create-bulk` |
+| `delivery:read` | View delivery details | `/api/deliveries/get`, `/api/deliveries/list` |
+| `payment:create` | Process payments | `/api/payments/charge` |
+| `payment:read` | View transaction history | `/api/payments/list-transactions`, `/api/payments/get-transaction` |
+| `webhook:manage` | Manage webhooks | `/api/webhooks/*` |
+| `location:read` | Access real-time location | WebSocket location updates |
+
+## Permission groups
+
+For convenience, you can think of permissions in logical groups:
+
+### Pricing permissions
+```
+pricing:read
+```
+Required to calculate delivery costs before creating deliveries.
+
+### Delivery permissions
+```
+delivery:create
+delivery:read
+```
+- `delivery:create` - Create single or bulk deliveries
+- `delivery:read` - View and list your deliveries
+
+### Payment permissions
+```
+payment:create
+payment:read
+```
+- `payment:create` - Charge wallet for deliveries
+- `payment:read` - View transaction history
+
+### Webhook permissions
+```
+webhook:manage
+```
+Full control over webhook configuration.
+
+### Location permissions
+```
+location:read
+```
+Required for WebSocket real-time tracking.
+
+## Common permission sets
+
+<AccordionGroup>
+  <Accordion title="Full access (all permissions)">
+    For development and testing, or when your application needs complete API access:
+    
+    ```json
+    [
+      "pricing:read",
+      "delivery:create",
+      "delivery:read",
+      "payment:create",
+      "payment:read",
+      "webhook:manage",
+      "location:read"
+    ]
+    ```
+  </Accordion>
+  
+  <Accordion title="E-commerce integration">
+    For an online store that creates and pays for deliveries:
+    
+    ```json
+    [
+      "pricing:read",
+      "delivery:create",
+      "delivery:read",
+      "payment:create"
+    ]
+    ```
+  </Accordion>
+  
+  <Accordion title="Tracking dashboard">
+    For a dashboard that only displays delivery status:
+    
+    ```json
+    [
+      "delivery:read",
+      "location:read"
+    ]
+    ```
+  </Accordion>
+  
+  <Accordion title="Reporting system">
+    For a system that generates reports on deliveries and payments:
+    
+    ```json
+    [
+      "delivery:read",
+      "payment:read"
+    ]
+    ```
+  </Accordion>
+  
+  <Accordion title="Pricing calculator">
+    For a tool that only calculates delivery prices:
+    
+    ```json
+    [
+      "pricing:read"
+    ]
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Setting permissions
+
+When creating an API key through the dashboard:
+
+<Steps>
+  <Step title="Navigate to API Keys">
+    Go to [chidori.africa/dashboard](https://chidori.africa/dashboard) and open the API Keys section.
+  </Step>
+  <Step title="Create new key">
+    Click **Create API Key**.
+  </Step>
+  <Step title="Select permissions">
+    Check the boxes for each permission you want to grant. You can select individual permissions or use preset groups.
+  </Step>
+  <Step title="Create the key">
+    Click **Create** to generate your key with the selected permissions.
+  </Step>
+</Steps>
+
+## Permission errors
+
+When you attempt an action without the required permission, you receive a `403 Forbidden` response:
+
+<ResponseExample>
+```json 403 Forbidden
+{
+  "status": false,
+  "message": "Missing required permission: delivery:create"
+}
+```
+</ResponseExample>
+
+## Best practices
+
+<CardGroup cols={2}>
+  <Card title="Least privilege" icon="shield-check">
+    Only grant permissions that are actually needed. This limits damage if a key is compromised.
+  </Card>
+  <Card title="Separate keys by function" icon="key">
+    Create different keys for different parts of your application, each with only the permissions it needs.
+  </Card>
+  <Card title="Audit regularly" icon="magnifying-glass">
+    Periodically review your API keys and their permissions. Revoke unused keys.
+  </Card>
+  <Card title="Document key usage" icon="file-lines">
+    Keep track of which keys are used where in your infrastructure.
+  </Card>
+</CardGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="API Keys" icon="key" href="/authentication/api-keys">
+    Learn how to create and manage API keys.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+    Explore all available API endpoints.
+  </Card>
+</CardGroup>

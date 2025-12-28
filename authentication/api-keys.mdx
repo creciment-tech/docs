@@ -1,0 +1,181 @@
+---
+title: "API Keys"
+description: "Learn how to create and manage API keys for the Chidori API"
+---
+
+## Overview
+
+API keys are used to authenticate your requests to the Chidori API. Each key is tied to your account and can be configured with specific permissions and environment modes.
+
+## API key structure
+
+Chidori API keys follow this format:
+
+```
+sk_{mode}_{id}.{secret}
+```
+
+| Component | Description |
+|-----------|-------------|
+| `sk_` | Prefix indicating a secret key |
+| `{mode}` | Either `sandbox` or `live` |
+| `{id}` | Unique identifier (UUID) |
+| `{secret}` | 32-character secret hash |
+
+**Example keys:**
+```
+sk_sandbox_7c9aa6f0-0f62-4bb2-a3aa-6c7bbf7b9a1a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+sk_live_8d0bb7f1-1g73-5cc3-b4bb-7d8ccg8c0b2b.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+```
+
+## Creating API keys
+
+<Steps>
+  <Step title="Log in to your dashboard">
+    Navigate to [chidori.africa/dashboard](https://chidori.africa/dashboard) and sign in.
+  </Step>
+  <Step title="Go to API Keys section">
+    Find the **API Keys** section in your dashboard navigation.
+  </Step>
+  <Step title="Create a new key">
+    Click **Create API Key** and fill in the details:
+    
+    - **Name**: A descriptive name (e.g., "Production Server", "Development")
+    - **Mode**: Choose `sandbox` for testing or `live` for production
+    - **Permissions**: Select the permissions this key should have
+  </Step>
+  <Step title="Copy your key">
+    <Warning>
+      The full API key is only displayed once. Copy it immediately and store it securely.
+    </Warning>
+    
+    After creation, you will see the complete API key. Copy it and store it in a secure location like a password manager or environment variables.
+  </Step>
+</Steps>
+
+## Using API keys
+
+Include your API key in the `X-API-Key` header for all API requests:
+
+<CodeGroup>
+```bash cURL
+curl https://api.chidori.africa/api/deliveries/list \
+  -H "X-API-Key: sk_live_xxx.yyy"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.chidori.africa/api/deliveries/list', {
+  headers: {
+    'X-API-Key': 'sk_live_xxx.yyy'
+  }
+});
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.chidori.africa/api/deliveries/list',
+    headers={'X-API-Key': 'sk_live_xxx.yyy'}
+)
+```
+</CodeGroup>
+
+## Revoking API keys
+
+If an API key is compromised or no longer needed, revoke it immediately:
+
+<Steps>
+  <Step title="Access your dashboard">
+    Go to [chidori.africa/dashboard](https://chidori.africa/dashboard).
+  </Step>
+  <Step title="Find the key">
+    Locate the API key you want to revoke in the API Keys section.
+  </Step>
+  <Step title="Revoke the key">
+    Click the revoke button. The key will be immediately invalidated.
+  </Step>
+</Steps>
+
+<Warning>
+  Revoking a key is permanent. Any applications using that key will immediately lose access.
+</Warning>
+
+## Security best practices
+
+<AccordionGroup>
+  <Accordion title="Never expose keys in client-side code">
+    API keys should only be used in server-side code. Never include them in:
+    - JavaScript running in browsers
+    - Mobile app source code
+    - Public repositories
+    - Client-side configuration files
+  </Accordion>
+  
+  <Accordion title="Use environment variables">
+    Store API keys in environment variables, not in your codebase:
+    
+    ```bash
+    # .env file (never commit this)
+    CHIDORI_API_KEY=sk_live_xxx.yyy
+    ```
+    
+    ```javascript
+    // Access in your code
+    const apiKey = process.env.CHIDORI_API_KEY;
+    ```
+  </Accordion>
+  
+  <Accordion title="Use separate keys for each environment">
+    Create different API keys for:
+    - Local development (sandbox)
+    - Staging/testing (sandbox)
+    - Production (live)
+  </Accordion>
+  
+  <Accordion title="Rotate keys periodically">
+    Regularly rotate your API keys, especially for production environments. Create a new key, update your applications, then revoke the old key.
+  </Accordion>
+  
+  <Accordion title="Use minimum required permissions">
+    Only grant the permissions each key actually needs. See [Permissions](/authentication/permissions) for details.
+  </Accordion>
+</AccordionGroup>
+
+## Error responses
+
+When authentication fails, you will receive one of these errors:
+
+| Status Code | Message | Cause |
+|-------------|---------|-------|
+| `401` | Unauthorized | Missing or invalid API key |
+| `403` | Forbidden | Key lacks required permission |
+
+<ResponseExample>
+```json 401 Unauthorized
+{
+  "status": false,
+  "message": "Unauthorized"
+}
+```
+</ResponseExample>
+
+<ResponseExample>
+```json 403 Forbidden
+{
+  "status": false,
+  "message": "Missing required permission: delivery:create"
+}
+```
+</ResponseExample>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Permissions" icon="shield" href="/authentication/permissions">
+    Learn about API key permissions.
+  </Card>
+  <Card title="Environments" icon="server" href="/environments">
+    Understand sandbox vs live environments.
+  </Card>
+</CardGroup>

@@ -1,0 +1,298 @@
+---
+title: "Real-time Location Tracking"
+description: "Track driver locations in real-time via WebSocket"
+---
+
+## Overview
+
+Connect to the Chidori WebSocket server to receive real-time driver location updates for your deliveries. This is ideal for building live tracking maps and interfaces.
+
+<Note>
+  **Required permission:** `location:read`
+</Note>
+
+<Warning>
+  WebSocket is only available in the **live environment**. Sandbox mode does not support real-time location tracking.
+</Warning>
+
+## Connection details
+
+| Property | Value |
+|----------|-------|
+| **URL** | `https://api.chidori.africa` |
+| **Path** | `/enterprise-socket` |
+| **Protocol** | Socket.IO |
+
+## Authentication
+
+Pass your **live** API key in the `auth` object when connecting:
+
+```javascript
+const socket = io('https://api.chidori.africa', {
+  path: '/enterprise-socket',
+  auth: {
+    apiKey: 'sk_live_xxx.yyy'
+  }
+});
+```
+
+Alternatively, pass it as a query parameter:
+
+```javascript
+const socket = io('https://api.chidori.africa?apiKey=sk_live_xxx.yyy', {
+  path: '/enterprise-socket'
+});
+```
+
+## Security: User-scoped subscriptions
+
+You can only subscribe to deliveries that belong to your account. When you subscribe to a delivery, the server verifies that the delivery's `userId` matches your API key's owner. This ensures you only receive location updates for your own deliveries.
+
+<Info>
+  Attempting to subscribe to another user's delivery will result in an error: "Delivery not found or not owned by you"
+</Info>
+
+## Events
+
+### Events to emit (client → server)
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `subscribe:location` | `deliveryId` (string) | Subscribe to a delivery's location updates |
+| `unsubscribe:location` | `deliveryId` (string) | Unsubscribe from location updates |
+
+### Events to listen (server → client)
+
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `subscribed:location` | `{ deliveryId }` | Confirmation of successful subscription |
+| `unsubscribed:location` | `{ deliveryId }` | Confirmation of unsubscription |
+| `location:update` | Location object | Driver location update |
+| `error` | `{ message }` | Error message |
+
+## Connection example
+
+<CodeGroup>
+```javascript Browser/Node.js
+import { io } from 'socket.io-client';
+
+// Connect to WebSocket
+const socket = io('https://api.chidori.africa', {
+  path: '/enterprise-socket',
+  auth: {
+    apiKey: 'sk_live_xxx.yyy'
+  }
+});
+
+// Connection events
+socket.on('connect', () => {
+  console.log('Connected to Chidori WebSocket');
+});
+
+socket.on('disconnect', () => {
+  console.log('Disconnected from Chidori WebSocket');
+});
+
+socket.on('error', (error) => {
+  console.error('WebSocket error:', error.message);
+});
+
+// Subscribe to location updates for a delivery (must be owned by your account)
+socket.emit('subscribe:location', 'abc123-def456-ghi789');
+
+// Listen for subscription confirmation
+socket.on('subscribed:location', ({ deliveryId }) => {
+  console.log(`Tracking location for delivery: ${deliveryId}`);
+});
+
+// Listen for location updates
+socket.on('location:update', (data) => {
+  console.log('Location update:', data);
+  // Update your map marker with the new location
+  updateMapMarker(data.location.lat, data.location.lon);
+});
+
+// Unsubscribe when done
+socket.emit('unsubscribe:location', 'abc123-def456-ghi789');
+```
+
+```javascript React Hook
+import { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
+
+function useDriverLocation(apiKey, deliveryId) {
+  const [location, setLocation] = useState(null);
+  const [connected, setConnected] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!deliveryId) return;
+
+    const socket = io('https://api.chidori.africa', {
+      path: '/enterprise-socket',
+      auth: { apiKey }
+    });
+
+    socket.on('connect', () => {
+      setConnected(true);
+      setError(null);
+      socket.emit('subscribe:location', deliveryId);
+    });
+
+    socket.on('disconnect', () => {
+      setConnected(false);
+    });
+
+    socket.on('subscribed:location', ({ deliveryId }) => {
+      console.log(`Tracking location for: ${deliveryId}`);
+    });
+
+    socket.on('location:update', (data) => {
+      if (data.deliveryId === deliveryId) {
+        setLocation(data.location);
+      }
+    });
+
+    socket.on('error', (err) => {
+      setError(err.message);
+    });
+
+    return () => {
+      socket.emit('unsubscribe:location', deliveryId);
+      socket.disconnect();
+    };
+  }, [apiKey, deliveryId]);
+
+  return { location, connected, error };
+}
+
+// Usage in a tracking component
+function LiveTrackingMap({ deliveryId }) {
+  const { location, connected, error } = useDriverLocation(
+    process.env.CHIDORI_API_KEY,
+    deliveryId
+  );
+
+  if (error) return <div>Error: {error}</div>;
+  if (!connected) return <div>Connecting...</div>;
+  if (!location) return <div>Waiting for driver location...</div>;
+
+  return (
+    <Map center={[location.lat, location.lon]}>
+      <Marker position={[location.lat, location.lon]} />
+    </Map>
+  );
+}
+```
+</CodeGroup>
+
+## Location update payload
+
+When the driver's location changes, you receive:
+
+```json
+{
+  "deliveryId": "abc123-def456-ghi789",
+  "location": {
+    "lat": 6.5244,
+    "lon": 3.3792
+  },
+  "driverId": "driver-123",
+  "timestamp": "2025-01-15T10:45:00.000Z"
+}
+```
+
+<ResponseField name="deliveryId" type="string">
+  The delivery ID you subscribed to
+</ResponseField>
+
+<ResponseField name="location" type="object">
+  <Expandable title="properties">
+    <ResponseField name="lat" type="number">
+      Latitude coordinate
+    </ResponseField>
+    <ResponseField name="lon" type="number">
+      Longitude coordinate
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="driverId" type="string">
+  The driver's ID (may be null if not yet assigned)
+</ResponseField>
+
+<ResponseField name="timestamp" type="string">
+  ISO 8601 timestamp of the location update
+</ResponseField>
+
+## Error handling
+
+```javascript
+socket.on('error', (error) => {
+  switch (error.message) {
+    case 'Authentication required':
+      console.error('No API key provided');
+      break;
+    case 'Invalid API key':
+      console.error('API key is invalid or revoked');
+      break;
+    case 'WebSocket not available in sandbox mode':
+      console.error('Use a live API key for WebSocket');
+      break;
+    case 'Missing location:read permission':
+      console.error('API key lacks location:read permission');
+      break;
+    case 'Delivery not found or not owned by you':
+      console.error('Cannot subscribe to this delivery');
+      break;
+    default:
+      console.error('WebSocket error:', error.message);
+  }
+});
+```
+
+## Best practices
+
+<CardGroup cols={2}>
+  <Card title="Reconnection" icon="rotate">
+    Socket.IO handles reconnection automatically. Configure retry settings as needed.
+  </Card>
+  <Card title="Unsubscribe" icon="xmark">
+    Always unsubscribe from deliveries when no longer needed to reduce server load.
+  </Card>
+  <Card title="Error handling" icon="triangle-exclamation">
+    Handle connection errors gracefully and show appropriate UI feedback.
+  </Card>
+  <Card title="Fallback" icon="arrows-rotate">
+    Use the REST API to poll delivery status if WebSocket connection fails.
+  </Card>
+</CardGroup>
+
+## Installation
+
+Install the Socket.IO client:
+
+<CodeGroup>
+```bash npm
+npm install socket.io-client
+```
+
+```bash yarn
+yarn add socket.io-client
+```
+
+```bash pnpm
+pnpm add socket.io-client
+```
+</CodeGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Get Delivery" icon="truck" href="/api-reference/deliveries/get">
+    Get delivery details via REST API
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/api-reference/webhooks/overview">
+    Receive status change notifications via webhooks
+  </Card>
+</CardGroup>

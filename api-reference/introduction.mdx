@@ -1,33 +1,107 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: "API Reference"
+description: "Complete reference documentation for the Chidori Enterprise API"
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Overview
 
-## Welcome
+The Chidori Enterprise API enables you to programmatically create deliveries, process payments, and track shipments in real-time. This reference documents all available endpoints, request/response formats, and error codes.
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
+## Base URLs
 
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+<Tabs>
+  <Tab title="Sandbox">
+    ```
+    https://sandbox.chidori.africa
+    ```
+    Use for development and testing. No real deliveries or payments.
+  </Tab>
+  <Tab title="Live">
+    ```
+    https://api.chidori.africa
+    ```
+    Use for production. Real deliveries and payments.
+  </Tab>
+</Tabs>
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All API requests require authentication via the `X-API-Key` header:
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
+```bash
+curl https://api.chidori.africa/api/deliveries/list \
+  -H "X-API-Key: sk_live_xxx.yyy"
 ```
+
+<Note>
+  Some endpoints (like key management and sandbox wallet) require JWT Bearer authentication instead. These are noted in their respective documentation.
+</Note>
+
+## Request format
+
+All POST requests should include a JSON body with the `Content-Type: application/json` header:
+
+```bash
+curl -X POST https://api.chidori.africa/api/pricing/single \
+  -H "X-API-Key: sk_live_xxx.yyy" \
+  -H "Content-Type: application/json" \
+  -d '{"pickup": {"lat": 6.5244, "lon": 3.3792}, "destination": {"lat": 6.4654, "lon": 3.4064}}'
+```
+
+## Response format
+
+All responses follow a consistent JSON structure:
+
+<CodeGroup>
+```json Success Response
+{
+  "status": true,
+  "data": {
+    // Response data here
+  }
+}
+```
+
+```json Error Response
+{
+  "status": false,
+  "message": "Error description"
+}
+```
+</CodeGroup>
+
+## HTTP status codes
+
+| Code | Description |
+|------|-------------|
+| `200` | Success |
+| `400` | Bad request - Invalid parameters |
+| `401` | Unauthorized - Invalid or missing API key |
+| `402` | Payment required - Insufficient wallet balance |
+| `403` | Forbidden - Missing required permission |
+| `404` | Not found - Resource does not exist |
+| `503` | Service unavailable - Sandbox environment not available |
+
+## Rate limiting
+
+API requests are rate limited to ensure fair usage. If you exceed the limit, you will receive a `429 Too Many Requests` response. Contact support if you need higher limits.
+
+## API categories
+
+<CardGroup cols={2}>
+  <Card title="Pricing" icon="calculator" href="/api-reference/pricing/single">
+    Calculate delivery costs for single or bulk deliveries.
+  </Card>
+  <Card title="Deliveries" icon="truck" href="/api-reference/deliveries/create">
+    Create, retrieve, and list deliveries.
+  </Card>
+  <Card title="Payments" icon="credit-card" href="/api-reference/payments/charge">
+    Process payments and view transaction history.
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/api-reference/webhooks/overview">
+    Receive delivery status change notifications.
+  </Card>
+  <Card title="Real-time Tracking" icon="location-dot" href="/api-reference/websocket/connection">
+    Track driver locations via WebSocket (live only).
+  </Card>
+</CardGroup>

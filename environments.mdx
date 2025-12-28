@@ -1,0 +1,161 @@
+---
+title: "Environments"
+description: "Understanding sandbox and live environments in the Chidori API"
+---
+
+## Overview
+
+Chidori provides two separate environments to help you develop and test your integration before going live. Each environment is completely isolated with its own data, wallets, and API keys.
+
+## Environment comparison
+
+| Feature | Sandbox | Live |
+|---------|---------|------|
+| **Base URL** | `https://sandbox.chidori.africa` | `https://api.chidori.africa` |
+| **API Key Prefix** | `sk_sandbox_` | `sk_live_` |
+| **Real Deliveries** | No | Yes |
+| **Real Payments** | No (test wallet) | Yes (real wallet) |
+| **Driver Assignment** | Simulated | Real drivers |
+| **Webhooks** | Fully functional | Fully functional |
+
+## Sandbox environment
+
+The sandbox environment is designed for development and testing. Use it to:
+
+- Test your integration without affecting real deliveries
+- Experiment with different API flows
+- Test webhook integrations
+- Train your team on the API
+
+### Sandbox base URL
+
+```
+https://sandbox.chidori.africa
+```
+
+### Sandbox API keys
+
+Sandbox API keys start with `sk_sandbox_`:
+
+```
+sk_sandbox_7c9aa6f0-0f62-4bb2-a3aa-6c7bbf7b9a1a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+```
+
+### Test wallet
+
+In sandbox mode, you have access to a test wallet that you can fund with any amount through the [Chidori Dashboard](https://chidori.africa/dashboard):
+
+1. Go to the **Wallet** section in your dashboard
+2. Select your sandbox environment
+3. Click **Fund Wallet** and enter any amount
+4. The funds are added instantly at no cost
+
+<Tip>
+  You can reset your sandbox wallet to the default balance of ₦100,000 from the dashboard at any time.
+</Tip>
+
+### Sandbox limitations
+
+- Deliveries are not dispatched to real drivers
+- Location updates are simulated (WebSocket not available)
+- No real-world delivery tracking
+- Data may be periodically cleared
+
+## Live environment
+
+The live environment handles real deliveries with real drivers and real payments.
+
+### Live base URL
+
+```
+https://api.chidori.africa
+```
+
+### Live API keys
+
+Live API keys start with `sk_live_`:
+
+```
+sk_live_7c9aa6f0-0f62-4bb2-a3aa-6c7bbf7b9a1a.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+```
+
+<Warning>
+  Live API keys process real transactions. Keep them secure and never expose them in client-side code.
+</Warning>
+
+### Going live checklist
+
+Before switching to the live environment, ensure you have:
+
+<Steps>
+  <Step title="Test thoroughly in sandbox">
+    Complete all your integration testing in the sandbox environment.
+  </Step>
+  <Step title="Create live API keys">
+    Generate new API keys with mode set to **Live** from your dashboard.
+  </Step>
+  <Step title="Update your base URL">
+    Change your API base URL from `sandbox.chidori.africa` to `api.chidori.africa`.
+  </Step>
+  <Step title="Fund your live wallet">
+    Add funds to your live wallet through the dashboard or bank transfer.
+  </Step>
+  <Step title="Configure webhooks">
+    Update your webhook URL if needed for production.
+  </Step>
+  <Step title="Monitor your first deliveries">
+    Watch your first few live deliveries closely to ensure everything works as expected.
+  </Step>
+</Steps>
+
+## Switching between environments
+
+To switch between environments, you need to:
+
+1. **Change the base URL** in your API client
+2. **Use the appropriate API key** (sandbox or live)
+
+<CodeGroup>
+```javascript Node.js
+const CHIDORI_BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://api.chidori.africa'
+  : 'https://sandbox.chidori.africa';
+
+const CHIDORI_API_KEY = process.env.NODE_ENV === 'production'
+  ? process.env.CHIDORI_LIVE_KEY
+  : process.env.CHIDORI_SANDBOX_KEY;
+```
+
+```python Python
+import os
+
+CHIDORI_BASE_URL = (
+    'https://api.chidori.africa'
+    if os.environ.get('ENV') == 'production'
+    else 'https://sandbox.chidori.africa'
+)
+
+CHIDORI_API_KEY = (
+    os.environ.get('CHIDORI_LIVE_KEY')
+    if os.environ.get('ENV') == 'production'
+    else os.environ.get('CHIDORI_SANDBOX_KEY')
+)
+```
+</CodeGroup>
+
+## Best practices
+
+<CardGroup cols={2}>
+  <Card title="Use environment variables" icon="lock">
+    Never hardcode API keys. Use environment variables to manage keys for different environments.
+  </Card>
+  <Card title="Test webhooks in sandbox" icon="webhook">
+    Set up and test your webhook handlers in sandbox before going live.
+  </Card>
+  <Card title="Separate API keys" icon="key">
+    Create separate API keys for sandbox and live. Never mix them.
+  </Card>
+  <Card title="Monitor live usage" icon="chart-line">
+    Keep an eye on your live API usage and wallet balance.
+  </Card>
+</CardGroup>

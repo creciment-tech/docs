@@ -1,0 +1,280 @@
+---
+title: "Webhooks"
+description: "Receive real-time notifications when delivery status changes"
+---
+
+## Overview
+
+Webhooks allow you to receive real-time HTTP notifications when a delivery status changes. Instead of polling the API for updates, Chidori pushes status updates directly to your server.
+
+<Note>
+  Webhooks are configured through the [Chidori Dashboard](https://chidori.africa/dashboard). You can set your webhook URL and manage your signing secret from the dashboard.
+</Note>
+
+## How webhooks work
+
+<Steps>
+  <Step title="Configure webhook in dashboard">
+    Go to [chidori.africa/dashboard](https://chidori.africa/dashboard) and set your webhook URL in the settings.
+  </Step>
+  <Step title="Delivery status changes">
+    When a delivery status changes (e.g., ASSIGNED, PICKED_UP, DELIVERED), Chidori creates a webhook payload.
+  </Step>
+  <Step title="Payload delivered">
+    Chidori sends an HTTP POST request to your webhook URL with the event data.
+  </Step>
+  <Step title="Verify and process">
+    Your server verifies the signature and processes the event.
+  </Step>
+</Steps>
+
+## Webhook event
+
+Chidori sends webhooks for the `delivery.status_changed` event when a delivery transitions between statuses.
+
+### Delivery statuses
+
+| Status | Description |
+|--------|-------------|
+| `PENDING` | Delivery created, awaiting payment |
+| `PAID` | Payment received, awaiting driver assignment |
+| `ASSIGNED` | Driver assigned to the delivery |
+| `PICKED_UP` | Driver has picked up the package |
+| `IN_TRANSIT` | Package is on the way to destination |
+| `DELIVERED` | Package successfully delivered |
+| `CANCELLED` | Delivery was cancelled |
+
+## Webhook payload
+
+All webhook payloads follow this structure:
+
+```json
+{
+  "id": "evt_abc123def456",
+  "event": "delivery.status_changed",
+  "timestamp": "2025-01-15T10:45:00.000Z",
+  "data": {
+    "deliveryId": "abc123-def456-ghi789",
+    "trackingId": "CHI-ABC123",
+    "status": "IN_TRANSIT",
+    "bulk": null,
+    "order": null,
+    "isPaid": true,
+    "updatedAt": "2025-01-15T10:45:00.000Z"
+  }
+}
+```
+
+### Payload fields
+
+<ResponseField name="id" type="string">
+  Unique identifier for this webhook event
+</ResponseField>
+
+<ResponseField name="event" type="string">
+  Always `delivery.status_changed`
+</ResponseField>
+
+<ResponseField name="timestamp" type="string">
+  ISO 8601 timestamp when the event occurred
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="properties">
+    <ResponseField name="deliveryId" type="string">
+      Unique delivery ID
+    </ResponseField>
+    <ResponseField name="trackingId" type="string">
+      Human-readable tracking ID
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      New delivery status
+    </ResponseField>
+    <ResponseField name="bulk" type="string">
+      Bulk ID if part of a bulk delivery (null otherwise)
+    </ResponseField>
+    <ResponseField name="order" type="number">
+      Order position in bulk (null if not bulk)
+    </ResponseField>
+    <ResponseField name="isPaid" type="boolean">
+      Whether the delivery has been paid for
+    </ResponseField>
+    <ResponseField name="updatedAt" type="string">
+      Timestamp of the status change
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Signature verification
+
+Every webhook request includes a signature in the `X-Webhook-Signature` header. Always verify this signature to ensure the request came from Chidori.
+
+The signature format is: `t={timestamp},v1={signature}`
+
+<CodeGroup>
+```javascript Node.js
+const crypto = require('crypto');
+
+function verifyWebhookSignature(payload, signatureHeader, secret) {
+  const parts = signatureHeader.split(',');
+  const timestampPart = parts.find(p => p.startsWith('t='));
+  const signaturePart = parts.find(p => p.startsWith('v1='));
+  
+  if (!timestampPart || !signaturePart) return false;
+  
+  const timestamp = timestampPart.slice(2);
+  const providedSignature = signaturePart.slice(3);
+  
+  // Check timestamp is within 5 minutes
+  const timestampNum = parseInt(timestamp, 10);
+  const now = Math.floor(Date.now() / 1000);
+  if (Math.abs(now - timestampNum) > 300) return false;
+  
+  // Verify signature
+  const signedPayload = `${timestamp}.${JSON.stringify(payload)}`;
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(signedPayload)
+    .digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(providedSignature),
+    Buffer.from(expectedSignature)
+  );
+}
+
+// Express webhook handler
+app.post('/webhooks/chidori', express.json(), (req, res) => {
+  const signature = req.headers['x-webhook-signature'];
+  
+  if (!verifyWebhookSignature(req.body, signature, WEBHOOK_SECRET)) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  const { event, data } = req.body;
+  console.log(`Delivery ${data.deliveryId} status: ${data.status}`);
+  
+  // Process asynchronously
+  processStatusChange(data).catch(console.error);
+  
+  res.status(200).send('OK');
+});
+```
+
+```python Python
+import hmac
+import hashlib
+import json
+import time
+
+def verify_webhook_signature(payload, signature_header, secret):
+    parts = dict(p.split('=', 1) for p in signature_header.split(','))
+    
+    timestamp = parts.get('t')
+    provided_signature = parts.get('v1')
+    
+    if not timestamp or not provided_signature:
+        return False
+    
+    # Check timestamp is within 5 minutes
+    timestamp_num = int(timestamp)
+    now = int(time.time())
+    if abs(now - timestamp_num) > 300:
+        return False
+    
+    # Verify signature
+    signed_payload = f"{timestamp}.{json.dumps(payload)}"
+    expected_signature = hmac.new(
+        secret.encode(),
+        signed_payload.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    
+    return hmac.compare_digest(provided_signature, expected_signature)
+
+# Flask webhook handler
+@app.route('/webhooks/chidori', methods=['POST'])
+def handle_webhook():
+    signature = request.headers.get('X-Webhook-Signature')
+    
+    if not verify_webhook_signature(request.json, signature, WEBHOOK_SECRET):
+        return 'Invalid signature', 401
+    
+    data = request.json.get('data')
+    print(f"Delivery {data['deliveryId']} status: {data['status']}")
+    
+    return 'OK', 200
+```
+</CodeGroup>
+
+<Warning>
+  Always verify webhook signatures in production. Never trust webhook data without verification.
+</Warning>
+
+## Best practices
+
+<CardGroup cols={2}>
+  <Card title="Respond quickly" icon="bolt">
+    Return a 200 response immediately, then process the event asynchronously.
+  </Card>
+  <Card title="Handle duplicates" icon="copy">
+    Webhooks may be retried. Use the event `id` to handle duplicate events.
+  </Card>
+  <Card title="Use HTTPS" icon="lock">
+    Your webhook URL must use HTTPS for security.
+  </Card>
+  <Card title="Log everything" icon="file-lines">
+    Log all webhook events for debugging and audit purposes.
+  </Card>
+</CardGroup>
+
+## Retry policy
+
+If your webhook endpoint returns an error (non-2xx status), Chidori will retry the delivery:
+
+- **Retry attempts**: Up to 3 retries
+- **Retry intervals**: 1 second, 5 seconds, 30 seconds
+- **Timeout**: 10 seconds per request
+
+## Example: Update order status
+
+```javascript
+async function processStatusChange(data) {
+  const { deliveryId, trackingId, status } = data;
+  
+  // Find your order by delivery ID
+  const order = await Order.findOne({ deliveryId });
+  if (!order) return;
+  
+  // Update order status based on delivery status
+  switch (status) {
+    case 'ASSIGNED':
+      await order.update({ status: 'driver_assigned' });
+      await notifyCustomer(order, 'Your delivery has been assigned to a driver');
+      break;
+    case 'PICKED_UP':
+      await order.update({ status: 'picked_up' });
+      await notifyCustomer(order, 'Your package has been picked up');
+      break;
+    case 'IN_TRANSIT':
+      await order.update({ status: 'in_transit' });
+      break;
+    case 'DELIVERED':
+      await order.update({ status: 'delivered', deliveredAt: new Date() });
+      await notifyCustomer(order, 'Your package has been delivered!');
+      break;
+    case 'CANCELLED':
+      await order.update({ status: 'cancelled' });
+      await notifyCustomer(order, 'Your delivery has been cancelled');
+      break;
+  }
+}
+```
+
+## Webhook configuration
+
+Webhooks are managed through the Chidori Dashboard:
+
+<Card title="Configure Webhooks" icon="gear" href="https://chidori.africa/dashboard">
+  Set your webhook URL and view your signing secret in the dashboard.
+</Card>

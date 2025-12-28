@@ -1,0 +1,223 @@
+---
+title: "List Deliveries"
+description: "Retrieve a paginated list of your deliveries with filtering options"
+---
+
+## Overview
+
+Retrieve a paginated list of all your deliveries with optional filtering by status, payment status, bulk, and date range.
+
+<Note>
+  **Required permission:** `delivery:read`
+</Note>
+
+## Endpoint
+
+```
+GET /api/deliveries/list
+```
+
+## Request
+
+### Headers
+
+<ParamField header="X-API-Key" type="string" required>
+  Your Chidori API key
+</ParamField>
+
+### Query parameters
+
+<ParamField query="page" type="number" default="1">
+  Page number for pagination
+</ParamField>
+
+<ParamField query="limit" type="number" default="20">
+  Number of items per page (max 100)
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by delivery status (e.g., `PENDING`, `IN_TRANSIT`, `DELIVERED`)
+</ParamField>
+
+<ParamField query="bulk" type="string">
+  Filter by bulk ID, or use `true`/`false` to filter bulk vs non-bulk deliveries
+</ParamField>
+
+<ParamField query="isPaid" type="string">
+  Filter by payment status: `true` or `false`
+</ParamField>
+
+<ParamField query="createdFrom" type="string">
+  Filter deliveries created from this timestamp (ISO 8601)
+</ParamField>
+
+<ParamField query="createdTo" type="string">
+  Filter deliveries created up to this timestamp (ISO 8601)
+</ParamField>
+
+## Response
+
+### Success response
+
+<ResponseField name="status" type="boolean">
+  Always `true` for successful requests
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="properties">
+    <ResponseField name="page" type="number">
+      Current page number
+    </ResponseField>
+    <ResponseField name="limit" type="number">
+      Items per page
+    </ResponseField>
+    <ResponseField name="total" type="number">
+      Total number of matching deliveries
+    </ResponseField>
+    <ResponseField name="items" type="array">
+      Array of delivery objects
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+### Basic listing
+
+<RequestExample>
+```bash cURL
+curl "https://api.chidori.africa/api/deliveries/list?page=1&limit=20" \
+  -H "X-API-Key: sk_live_xxx.yyy"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://api.chidori.africa/api/deliveries/list?page=1&limit=20',
+  {
+    headers: {
+      'X-API-Key': 'sk_live_xxx.yyy'
+    }
+  }
+);
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.chidori.africa/api/deliveries/list',
+    params={'page': 1, 'limit': 20},
+    headers={'X-API-Key': 'sk_live_xxx.yyy'}
+)
+
+data = response.json()
+```
+</RequestExample>
+
+### With filters
+
+```bash
+# Get unpaid deliveries
+curl "https://api.chidori.africa/api/deliveries/list?isPaid=false" \
+  -H "X-API-Key: sk_live_xxx.yyy"
+
+# Get deliveries in transit
+curl "https://api.chidori.africa/api/deliveries/list?status=IN_TRANSIT" \
+  -H "X-API-Key: sk_live_xxx.yyy"
+
+# Get bulk deliveries only
+curl "https://api.chidori.africa/api/deliveries/list?bulk=true" \
+  -H "X-API-Key: sk_live_xxx.yyy"
+
+# Get deliveries from a specific bulk
+curl "https://api.chidori.africa/api/deliveries/list?bulk=1a4f1a5e-5b79-4c4a-a0d4-4c5c7b7bb1aa" \
+  -H "X-API-Key: sk_live_xxx.yyy"
+
+# Get deliveries from date range
+curl "https://api.chidori.africa/api/deliveries/list?createdFrom=2025-01-01T00:00:00Z&createdTo=2025-01-31T23:59:59Z" \
+  -H "X-API-Key: sk_live_xxx.yyy"
+```
+
+<ResponseExample>
+```json 200 Success
+{
+  "status": true,
+  "data": {
+    "page": 1,
+    "limit": 20,
+    "total": 45,
+    "items": [
+      {
+        "id": "abc123-def456-ghi789",
+        "trackingId": "CHI-ABC123",
+        "deliveryStatus": "DELIVERED",
+        "deliveryName": "Office Supplies",
+        "deliveryAmount": 2500,
+        "isPaid": true,
+        "bulk": null,
+        "createdAt": "2025-01-15T10:00:00.000Z"
+      },
+      {
+        "id": "def456-ghi789-jkl012",
+        "trackingId": "CHI-DEF456",
+        "deliveryStatus": "IN_TRANSIT",
+        "deliveryName": "Electronics",
+        "deliveryAmount": 3500,
+        "isPaid": true,
+        "bulk": "1a4f1a5e-5b79-4c4a-a0d4-4c5c7b7bb1aa",
+        "createdAt": "2025-01-15T11:00:00.000Z"
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+## Pagination
+
+To iterate through all deliveries:
+
+```javascript
+async function getAllDeliveries() {
+  const allDeliveries = [];
+  let page = 1;
+  let hasMore = true;
+  
+  while (hasMore) {
+    const response = await fetch(
+      `https://api.chidori.africa/api/deliveries/list?page=${page}&limit=100`,
+      { headers: { 'X-API-Key': apiKey } }
+    );
+    const { data } = await response.json();
+    
+    allDeliveries.push(...data.items);
+    hasMore = data.items.length === 100;
+    page++;
+  }
+  
+  return allDeliveries;
+}
+```
+
+## Filter combinations
+
+You can combine multiple filters:
+
+```bash
+# Unpaid pending deliveries from January
+curl "https://api.chidori.africa/api/deliveries/list?status=PENDING&isPaid=false&createdFrom=2025-01-01T00:00:00Z&createdTo=2025-01-31T23:59:59Z" \
+  -H "X-API-Key: sk_live_xxx.yyy"
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Get Delivery" icon="magnifying-glass" href="/api-reference/deliveries/get">
+    Get detailed information about a specific delivery
+  </Card>
+  <Card title="Webhooks" icon="webhook" href="/api-reference/webhooks/overview">
+    Get notified when delivery status changes
+  </Card>
+</CardGroup>

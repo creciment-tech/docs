@@ -1,23 +1,3 @@
----
-title: "Windsurf setup"
-description: "Configure Windsurf for your documentation workflow"
-icon: "water"
----
-
-Configure Windsurf's Cascade AI assistant to help you write and maintain documentation. This guide shows how to set up Windsurf specifically for your Mintlify documentation workflow.
-
-## Prerequisites
-
-- Windsurf editor installed
-- Access to your documentation repository
-
-## Workspace rules
-
-Create workspace rules that provide Windsurf with context about your documentation project and standards.
-
-Create `.windsurf/rules.md` in your project root:
-
-````markdown
 # Mintlify technical writing rule
 
 ## Project context
@@ -48,6 +28,10 @@ description: "Concise description for SEO and navigation"
 ```
 
 ## Mintlify components
+
+### docs.json
+
+- Refer to the [docs.json schema](https://mintlify.com/docs.json) when building the docs.json file and site navigation
 
 ### Callouts
 
@@ -93,4 +77,3 @@ description: "Concise description for SEO and navigation"
 - Include alt text for all images
 - Ensure proper heading hierarchy (start with h2)
 - Check existing patterns for consistency
-````

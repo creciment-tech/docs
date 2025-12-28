@@ -1,0 +1,209 @@
+---
+title: "List Transactions"
+description: "Retrieve your transaction history with pagination"
+---
+
+## Overview
+
+Retrieve a paginated list of your wallet transactions, including both debits (payments) and credits (deposits).
+
+<Note>
+  **Required permission:** `payment:read`
+</Note>
+
+## Endpoint
+
+```
+GET /api/payments/list-transactions
+```
+
+## Request
+
+### Headers
+
+<ParamField header="X-API-Key" type="string" required>
+  Your Chidori API key
+</ParamField>
+
+### Query parameters
+
+<ParamField query="page" type="number" default="1">
+  Page number for pagination
+</ParamField>
+
+<ParamField query="limit" type="number" default="20">
+  Number of items per page (max 100)
+</ParamField>
+
+## Response
+
+### Success response
+
+<ResponseField name="status" type="boolean">
+  Always `true` for successful requests
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="properties">
+    <ResponseField name="page" type="number">
+      Current page number
+    </ResponseField>
+    <ResponseField name="limit" type="number">
+      Items per page
+    </ResponseField>
+    <ResponseField name="total" type="number">
+      Total number of transactions
+    </ResponseField>
+    <ResponseField name="items" type="array">
+      Array of transaction objects
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<RequestExample>
+```bash cURL
+curl "https://api.chidori.africa/api/payments/list-transactions?page=1&limit=20" \
+  -H "X-API-Key: sk_live_xxx.yyy"
+```
+
+```javascript JavaScript
+const response = await fetch(
+  'https://api.chidori.africa/api/payments/list-transactions?page=1&limit=20',
+  {
+    headers: {
+      'X-API-Key': 'sk_live_xxx.yyy'
+    }
+  }
+);
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.chidori.africa/api/payments/list-transactions',
+    params={'page': 1, 'limit': 20},
+    headers={'X-API-Key': 'sk_live_xxx.yyy'}
+)
+
+data = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 Success
+{
+  "status": true,
+  "data": {
+    "page": 1,
+    "limit": 20,
+    "total": 45,
+    "items": [
+      {
+        "id": "txn-123-456-789",
+        "type": "DEBIT",
+        "amount": 2500,
+        "reference": "order_12345_payment",
+        "description": "Delivery payment - CHI-ABC123",
+        "balanceBefore": 50000,
+        "balanceAfter": 47500,
+        "createdAt": "2025-01-15T10:30:00.000Z"
+      },
+      {
+        "id": "txn-456-789-012",
+        "type": "CREDIT",
+        "amount": 100000,
+        "reference": "deposit_paystack_xyz",
+        "description": "Wallet funding",
+        "balanceBefore": 0,
+        "balanceAfter": 100000,
+        "createdAt": "2025-01-15T09:00:00.000Z"
+      }
+    ]
+  }
+}
+```
+</ResponseExample>
+
+## Transaction types
+
+| Type | Description |
+|------|-------------|
+| `DEBIT` | Money deducted from wallet (delivery payments) |
+| `CREDIT` | Money added to wallet (deposits, refunds) |
+
+## Use cases
+
+<AccordionGroup>
+  <Accordion title="Generate monthly statement">
+    ```javascript
+    async function getMonthlyStatement(year, month) {
+      const transactions = [];
+      let page = 1;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const response = await fetch(
+          `https://api.chidori.africa/api/payments/list-transactions?page=${page}&limit=100`,
+          { headers: { 'X-API-Key': apiKey } }
+        );
+        const { data } = await response.json();
+        
+        // Filter by month
+        const monthlyTxns = data.items.filter(txn => {
+          const date = new Date(txn.createdAt);
+          return date.getFullYear() === year && date.getMonth() === month - 1;
+        });
+        
+        transactions.push(...monthlyTxns);
+        hasMore = data.items.length === 100;
+        page++;
+      }
+      
+      return transactions;
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Calculate spending">
+    ```javascript
+    async function calculateTotalSpending() {
+      let totalSpent = 0;
+      let page = 1;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const response = await fetch(
+          `https://api.chidori.africa/api/payments/list-transactions?page=${page}&limit=100`,
+          { headers: { 'X-API-Key': apiKey } }
+        );
+        const { data } = await response.json();
+        
+        totalSpent += data.items
+          .filter(txn => txn.type === 'DEBIT')
+          .reduce((sum, txn) => sum + txn.amount, 0);
+        
+        hasMore = data.items.length === 100;
+        page++;
+      }
+      
+      return totalSpent;
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Get Transaction" icon="receipt" href="/api-reference/payments/get-transaction">
+    Get details of a specific transaction
+  </Card>
+  <Card title="Charge Payment" icon="credit-card" href="/api-reference/payments/charge">
+    Process a new payment
+  </Card>
+</CardGroup>
