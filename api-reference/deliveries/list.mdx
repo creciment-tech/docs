@@ -36,7 +36,7 @@ GET /api/deliveries/list
 </ParamField>
 
 <ParamField query="status" type="string">
-  Filter by delivery status (e.g., `PENDING`, `IN_TRANSIT`, `DELIVERED`)
+  Filter by delivery status (e.g., `PENDING`, `STARTED`, `PICKED-UP`, `COMPLETED`, `CANCELLED`)
 </ParamField>
 
 <ParamField query="bulk" type="string">
@@ -123,8 +123,8 @@ data = response.json()
 curl "https://api.chidori.africa/enterprise-service/api/deliveries/list?isPaid=false" \
   -H "X-API-Key: sk_live_xxx.yyy"
 
-# Get deliveries in transit
-curl "https://api.chidori.africa/enterprise-service/api/deliveries/list?status=IN_TRANSIT" \
+# Get deliveries that are started
+curl "https://api.chidori.africa/enterprise-service/api/deliveries/list?status=STARTED" \
   -H "X-API-Key: sk_live_xxx.yyy"
 
 # Get bulk deliveries only
@@ -152,7 +152,7 @@ curl "https://api.chidori.africa/enterprise-service/api/deliveries/list?createdF
       {
         "id": "abc123-def456-ghi789",
         "trackingId": "CHI-ABC123",
-        "deliveryStatus": "DELIVERED",
+        "deliveryStatus": "COMPLETED",
         "deliveryName": "Office Supplies",
         "deliveryAmount": 2500,
         "isPaid": true,
@@ -162,7 +162,7 @@ curl "https://api.chidori.africa/enterprise-service/api/deliveries/list?createdF
       {
         "id": "def456-ghi789-jkl012",
         "trackingId": "CHI-DEF456",
-        "deliveryStatus": "IN_TRANSIT",
+        "deliveryStatus": "STARTED",
         "deliveryName": "Electronics",
         "deliveryAmount": 3500,
         "isPaid": true,

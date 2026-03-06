@@ -84,6 +84,9 @@ POST /api/deliveries/create
     <ResponseField name="order" type="number">
       Order position if part of a bulk delivery
     </ResponseField>
+    <ResponseField name="orderCode" type="string">
+      Order code for the delivery (nullable)
+    </ResponseField>
   </Expandable>
 </ResponseField>
 
@@ -153,7 +156,8 @@ data = response.json()
     "trackingId": "CHI-ABC123",
     "deliveryStatus": "PENDING",
     "bulk": null,
-    "order": null
+    "order": null,
+    "orderCode": null
   }
 }
 ```
@@ -194,12 +198,10 @@ data = response.json()
 
 | Status | Description |
 |--------|-------------|
-| `PENDING` | Delivery created, awaiting payment |
-| `PAID` | Payment received, awaiting driver assignment |
-| `ASSIGNED` | Driver assigned to the delivery |
-| `PICKED_UP` | Driver has picked up the package |
-| `IN_TRANSIT` | Package is on the way to destination |
-| `DELIVERED` | Package successfully delivered |
+| `PENDING` | Delivery created, awaiting payment or driver assignment |
+| `STARTED` | Driver has accepted and started the delivery |
+| `PICKED-UP` | Driver has picked up the package |
+| `COMPLETED` | Package successfully delivered |
 | `CANCELLED` | Delivery was cancelled |
 
 <Tip>

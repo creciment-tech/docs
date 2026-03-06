@@ -46,13 +46,19 @@ Provide either `id` OR `trackingId`:
 </ResponseField>
 
 <ResponseField name="data" type="object">
-  Complete delivery object with all details including:
-  - Delivery ID and tracking ID
-  - Status and timestamps
-  - Pickup and destination coordinates
-  - Pricing information
-  - Driver details (when assigned)
-  - Payment status
+  Complete delivery object with all public fields
+  
+  See the [Field Reference](/api-reference/deliveries/fields) for detailed descriptions of all fields.
+  
+  Key fields include:
+  - Core identifiers (id, trackingId, userId, driverId)
+  - Status and type (deliveryStatus, deliveryType)
+  - Location data (pickupAddress, pickupLatLong, destinationAddress, destinationLatLong)
+  - Route information (distance, duration, geometry)
+  - Contact info (receiverPhoneNumber, senderPhoneNumber)
+  - Payment details (deliveryAmount, isPaid, transactionId)
+  - Timing (scheduledTime, pickedUpAt, arrivedTime, createdAt, updatedAt)
+  - Bulk info (bulk, order)
 </ResponseField>
 
 ## Examples
@@ -102,33 +108,42 @@ data = response.json()
   "status": true,
   "data": {
     "id": "abc123-def456-ghi789",
+    "userId": "user-uuid-123",
+    "driverId": "driver-uuid-456",
     "trackingId": "CHI-ABC123",
-    "deliveryStatus": "IN_TRANSIT",
+    "deliveryStatus": "PICKED-UP",
     "deliveryName": "Office Supplies",
     "deliveryType": "SendDelivery",
-    "pickup": {
-      "lat": 6.5244,
-      "lon": 3.3792,
-      "address": "123 Main Street, Lagos"
-    },
-    "destination": {
-      "lat": 6.4654,
-      "lon": 3.4064,
-      "address": "456 Business Ave, Lagos"
-    },
     "deliveryAmount": 2500,
-    "isPaid": true,
-    "paidAt": "2025-01-15T10:30:00.000Z",
-    "bulk": null,
-    "driver": {
-      "id": "driver-123",
-      "name": "John Driver",
-      "phone": "+2348011111111",
-      "vehicleType": "Motorcycle"
+    "pickupAddress": "123 Main Street, Lagos",
+    "pickupLatLong": {
+      "lat": 6.5244,
+      "lon": 3.3792
     },
-    "receiverPhoneNumber": "+2348012345678",
-    "senderPhoneNumber": "+2348087654321",
+    "destinationAddress": "456 Business Ave, Lagos",
+    "destinationLatLong": {
+      "lat": 6.4654,
+      "lon": 3.4064
+    },
+    "route": {
+      "distance": 5200,
+      "duration": 900,
+      "geometry": "encoded_polyline_string"
+    },
+    "receiverPhoneNumber": "2348012345678",
+    "senderPhoneNumber": "2348087654321",
     "additionalNotes": "Please call before delivery",
+    "packageImage": [],
+    "isPaid": true,
+    "transactionId": "txn_abc123",
+    "hasArrived": false,
+    "scheduledTime": null,
+    "pickedUpAt": "2025-01-15T10:30:00.000Z",
+    "arrivedAtPickupLocationTime": "2025-01-15T10:15:00.000Z",
+    "arrivedTime": null,
+    "bulk": null,
+    "order": null,
+    "orderCode": null,
     "createdAt": "2025-01-15T10:00:00.000Z",
     "updatedAt": "2025-01-15T10:45:00.000Z"
   }
@@ -154,12 +169,10 @@ data = response.json()
 
 | Status | Description |
 |--------|-------------|
-| `PENDING` | Delivery created, awaiting payment |
-| `PAID` | Payment received, awaiting driver assignment |
-| `ASSIGNED` | Driver assigned to the delivery |
-| `PICKED_UP` | Driver has picked up the package |
-| `IN_TRANSIT` | Package is on the way to destination |
-| `DELIVERED` | Package successfully delivered |
+| `PENDING` | Delivery created, awaiting payment or driver assignment |
+| `STARTED` | Driver has accepted and started the delivery |
+| `PICKED-UP` | Driver has picked up the package |
+| `COMPLETED` | Package successfully delivered |
 | `CANCELLED` | Delivery was cancelled |
 
 ## Use cases

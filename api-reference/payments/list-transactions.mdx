@@ -35,6 +35,10 @@ GET /api/payments/list-transactions
   Number of items per page (max 100)
 </ParamField>
 
+<ParamField query="type" type="string">
+  Filter by transaction type: `credit` or `debit`
+</ParamField>
+
 ## Response
 
 ### Success response
@@ -108,9 +112,9 @@ data = response.json()
         "type": "DEBIT",
         "amount": 2500,
         "reference": "order_12345_payment",
-        "description": "Delivery payment - CHI-ABC123",
-        "balanceBefore": 50000,
-        "balanceAfter": 47500,
+        "paymentType": "Delivery Request",
+        "paymentChannel": "Wallet",
+        "transactionId": "txn_abc123",
         "createdAt": "2025-01-15T10:30:00.000Z"
       },
       {
@@ -118,9 +122,9 @@ data = response.json()
         "type": "CREDIT",
         "amount": 100000,
         "reference": "deposit_paystack_xyz",
-        "description": "Wallet funding",
-        "balanceBefore": 0,
-        "balanceAfter": 100000,
+        "paymentType": "Fund Wallet",
+        "paymentChannel": "Paystack",
+        "transactionId": "txn_xyz789",
         "createdAt": "2025-01-15T09:00:00.000Z"
       }
     ]

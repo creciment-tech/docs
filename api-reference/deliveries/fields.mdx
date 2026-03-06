@@ -1,0 +1,387 @@
+---
+title: "Delivery Fields Reference"
+description: "Complete reference for all delivery object fields"
+---
+
+## Overview
+
+This page provides detailed descriptions for all fields in the delivery object returned by the API.
+
+---
+
+## Core Identifiers
+
+<ResponseField name="id" type="string (UUID)" required>
+  Unique identifier for the delivery
+  
+  - Used for API calls and internal references
+  - Automatically generated on creation
+  - Example: `"abc123-def456-ghi789"`
+</ResponseField>
+
+<ResponseField name="trackingId" type="string" required>
+  Human-readable tracking identifier
+  
+  - Shared with customers for tracking
+  - 12-character alphanumeric string
+  - Example: `"CHI-ABC123"`
+</ResponseField>
+
+<ResponseField name="userId" type="string (UUID)" required>
+  ID of the user who created the delivery
+  
+  - Links to the API key owner
+  - Used for authorization checks
+</ResponseField>
+
+<ResponseField name="driverId" type="string (UUID)" nullable>
+  ID of the assigned driver
+  
+  - `null` if no driver assigned yet
+  - Populated when driver accepts the delivery
+</ResponseField>
+
+---
+
+## Status & Type
+
+<ResponseField name="deliveryStatus" type="enum" required>
+  Current status of the delivery
+  
+  **Possible values:**
+  - `PENDING` - Created, awaiting payment or driver assignment
+  - `STARTED` - Driver has accepted and started the delivery
+  - `PICKED-UP` - Package picked up by driver
+  - `COMPLETED` - Successfully delivered
+  - `CANCELLED` - Delivery was cancelled
+</ResponseField>
+
+<ResponseField name="deliveryType" type="enum" required>
+  Type of delivery service
+  
+  **Possible values:**
+  - `SendDelivery` - Standard delivery from point A to B
+  - `RequestPickup` - Pickup request service
+</ResponseField>
+
+<ResponseField name="deliveryName" type="string" nullable>
+  Optional custom name for the delivery
+  
+  - Helps identify deliveries in your system
+  - Example: `"Office Supplies"`, `"Customer Order #1234"`
+</ResponseField>
+
+---
+
+## Location & Route
+
+<ResponseField name="pickupAddress" type="string" required>
+  Full address of the pickup location
+  
+  - Human-readable format
+  - Example: `"123 Main Street, Victoria Island, Lagos"`
+</ResponseField>
+
+<ResponseField name="pickupLatLong" type="object" required>
+  Precise coordinates of the pickup location
+  
+  <Expandable title="properties">
+    <ResponseField name="lat" type="number">
+      Latitude coordinate
+      
+      Example: `6.5244`
+    </ResponseField>
+    
+    <ResponseField name="lon" type="number">
+      Longitude coordinate
+      
+      Example: `3.3792`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="destinationAddress" type="string" required>
+  Full address of the delivery destination
+  
+  - Human-readable format
+  - Example: `"456 Business Avenue, Lekki, Lagos"`
+</ResponseField>
+
+<ResponseField name="destinationLatLong" type="object" required>
+  Precise coordinates of the destination
+  
+  <Expandable title="properties">
+    <ResponseField name="lat" type="number">
+      Latitude coordinate
+    </ResponseField>
+    
+    <ResponseField name="lon" type="number">
+      Longitude coordinate
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="currentLocation" type="object" nullable>
+  Driver's current location during delivery
+  
+  - Only available when delivery is in progress
+  - `null` when delivery is pending or completed
+  - Updates in real-time via WebSocket
+  
+  <Expandable title="properties">
+    <ResponseField name="lat" type="number">
+      Current latitude
+    </ResponseField>
+    
+    <ResponseField name="lon" type="number">
+      Current longitude
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="route" type="object" nullable>
+  Calculated route information from pickup to destination
+  
+  <Expandable title="properties">
+    <ResponseField name="distance" type="number">
+      Total distance in meters
+      
+      Example: `5200` (5.2 km)
+    </ResponseField>
+    
+    <ResponseField name="duration" type="number">
+      Estimated duration in seconds
+      
+      Example: `900` (15 minutes)
+    </ResponseField>
+    
+    <ResponseField name="geometry" type="string">
+      Encoded polyline for map display
+      
+      - Use with mapping libraries to draw route
+      - Google Polyline encoding format
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Contact Information
+
+<ResponseField name="receiverPhoneNumber" type="string" required>
+  Recipient's phone number
+  
+  - Normalized to Nigerian format (234 prefix)
+  - Example: `"2348012345678"`
+</ResponseField>
+
+<ResponseField name="senderPhoneNumber" type="string" required>
+  Sender's phone number
+  
+  - Normalized to Nigerian format (234 prefix)
+  - Example: `"2348087654321"`
+</ResponseField>
+
+<ResponseField name="additionalNotes" type="string" nullable>
+  Special delivery instructions
+  
+  - Visible to the assigned driver
+  - Example: `"Please call before delivery"`, `"Leave at gate"`
+</ResponseField>
+
+---
+
+## Payment & Pricing
+
+<ResponseField name="deliveryAmount" type="number" required>
+  Total delivery cost in Naira (₦)
+  
+  - Includes all fees and charges
+  - Example: `2500` (₦2,500)
+</ResponseField>
+
+<ResponseField name="isPaid" type="boolean" required>
+  Payment status
+  
+  - `true` if payment has been completed
+  - `false` if payment is pending
+</ResponseField>
+
+<ResponseField name="transactionId" type="string" nullable>
+  Payment transaction reference
+  
+  - Links to the payment record
+  - Populated after successful payment
+</ResponseField>
+
+---
+
+## Package Information
+
+<ResponseField name="packageImage" type="array" nullable>
+  Photos of the package
+  
+  - Array of image objects
+  - Uploaded by driver or sender
+  - Used for proof of delivery
+</ResponseField>
+
+---
+
+## Timing & Schedule
+
+<ResponseField name="scheduledTime" type="datetime" nullable>
+  Scheduled delivery time
+  
+  - ISO 8601 format
+  - `null` for immediate deliveries
+  - Example: `"2025-01-15T14:00:00.000Z"`
+</ResponseField>
+
+<ResponseField name="pickedUpAt" type="datetime" nullable>
+  When the driver picked up the package
+  
+  - ISO 8601 format
+  - `null` until package is picked up
+  - Example: `"2025-01-15T10:30:00.000Z"`
+</ResponseField>
+
+<ResponseField name="arrivedAtPickupLocationTime" type="datetime" nullable>
+  When the driver arrived at the pickup location
+  
+  - ISO 8601 format
+  - `null` until driver arrives
+  - Example: `"2025-01-15T10:15:00.000Z"`
+</ResponseField>
+
+<ResponseField name="arrivedTime" type="datetime" nullable>
+  When the driver arrived at the destination
+  
+  - ISO 8601 format
+  - `null` until driver arrives at destination
+  - Example: `"2025-01-15T11:00:00.000Z"`
+</ResponseField>
+
+<ResponseField name="createdAt" type="datetime" required>
+  When the delivery was created
+  
+  - ISO 8601 format
+  - Automatically set on creation
+  - Example: `"2025-01-15T10:00:00.000Z"`
+</ResponseField>
+
+<ResponseField name="updatedAt" type="datetime" required>
+  Last modification timestamp
+  
+  - ISO 8601 format
+  - Updates automatically on any change
+  - Example: `"2025-01-15T10:45:00.000Z"`
+</ResponseField>
+
+---
+
+## Driver Status
+
+<ResponseField name="hasArrived" type="boolean" required>
+  Whether the driver has arrived at the destination
+  
+  - Used for arrival notifications
+  - `true` when driver reaches destination
+</ResponseField>
+
+---
+
+## Bulk Deliveries
+
+<ResponseField name="bulk" type="string (UUID)" nullable>
+  Bulk delivery group identifier
+  
+  - `null` for single deliveries
+  - All deliveries with the same bulk ID are part of one bulk order
+  - Used to group multiple deliveries from the same pickup location
+</ResponseField>
+
+<ResponseField name="order" type="number" nullable>
+  Position in bulk delivery sequence
+  
+  - `null` for single deliveries
+  - Determines the order for multi-stop routes
+  - Example: `1`, `2`, `3` for first, second, third stops
+</ResponseField>
+
+<ResponseField name="orderCode" type="string" nullable>
+  Order code for the delivery
+  
+  - Optional reference code for tracking
+  - Can be used to link delivery to external order systems
+  - `null` if not provided
+</ResponseField>
+
+---
+
+## Field Exclusions
+
+The following fields exist in the database but are **excluded** from API responses for security and business logic reasons:
+
+- `usesPromo` - Internal promo tracking
+- `promoPercentage` - Internal pricing calculation
+- `driverCut` - Internal revenue split
+- `companyCut` - Internal revenue split
+- `shop` - Internal shop reference
+- `vehicleDirection` - Internal tracking
+- `inActive` - Internal flag
+- `deliveryDate` - Deprecated (use `createdAt` or `scheduledTime`)
+- `deliveryTime` - Deprecated (use timestamp fields)
+- `pickupTime` - Deprecated (use `pickedUpAt`)
+
+---
+
+## Example Complete Delivery Object
+
+```json
+{
+  "id": "abc123-def456-ghi789",
+  "trackingId": "CHI-ABC123",
+  "userId": "user-uuid-123",
+  "driverId": "driver-uuid-456",
+  "deliveryStatus": "PICKED-UP",
+  "deliveryType": "SendDelivery",
+  "deliveryName": "Office Supplies",
+  "deliveryAmount": 2500,
+  "isPaid": true,
+  "transactionId": "txn_abc123",
+  "pickupAddress": "123 Main Street, Victoria Island, Lagos",
+  "pickupLatLong": {
+    "lat": 6.5244,
+    "lon": 3.3792
+  },
+  "destinationAddress": "456 Business Avenue, Lekki, Lagos",
+  "destinationLatLong": {
+    "lat": 6.4654,
+    "lon": 3.4064
+  },
+  "currentLocation": {
+    "lat": 6.5100,
+    "lon": 3.3850
+  },
+  "route": {
+    "distance": 5200,
+    "duration": 900,
+    "geometry": "encoded_polyline_string"
+  },
+  "receiverPhoneNumber": "2348012345678",
+  "senderPhoneNumber": "2348087654321",
+  "additionalNotes": "Please call before delivery",
+  "packageImage": [],
+  "hasArrived": false,
+  "scheduledTime": null,
+  "pickedUpAt": "2025-01-15T10:30:00.000Z",
+  "arrivedAtPickupLocationTime": "2025-01-15T10:15:00.000Z",
+  "arrivedTime": null,
+  "bulk": null,
+  "order": null,
+  "orderCode": null,
+  "createdAt": "2025-01-15T10:00:00.000Z",
+  "updatedAt": "2025-01-15T10:45:00.000Z"
+}
+```

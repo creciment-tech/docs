@@ -1,0 +1,175 @@
+---
+title: "Transaction Fields Reference"
+description: "Complete reference for transaction object fields"
+---
+
+## Overview
+
+This page provides detailed descriptions for all fields in the transaction object returned by payment endpoints.
+
+---
+
+## Transaction Fields
+
+<ResponseField name="id" type="string (UUID)" required>
+  Unique identifier for the transaction
+  
+  - Automatically generated on creation
+  - Example: `"txn-123-456-789"`
+</ResponseField>
+
+<ResponseField name="type" type="enum" required>
+  Transaction type
+  
+  **Possible values:**
+  - `DEBIT` - Money deducted from wallet (payments)
+  - `CREDIT` - Money added to wallet (deposits, refunds)
+</ResponseField>
+
+<ResponseField name="amount" type="number" required>
+  Transaction amount in Naira (₦)
+  
+  - Always positive number
+  - Example: `2500` (₦2,500)
+</ResponseField>
+
+<ResponseField name="reference" type="string" required>
+  Client-provided idempotency reference
+  
+  - Used to prevent duplicate charges
+  - Unique per transaction
+  - Example: `"order_12345_payment"`
+</ResponseField>
+
+<ResponseField name="paymentType" type="enum" required>
+  Type of payment operation
+  
+  **Possible values:**
+  - `Fund Wallet` - Wallet deposit
+  - `Delivery Request` - Delivery payment
+  - `Delivery` - General delivery
+  - `Pickup Request` - Pickup service payment
+  - `Withdrawal` - Wallet withdrawal
+</ResponseField>
+
+<ResponseField name="paymentChannel" type="enum" required>
+  Payment method used
+  
+  **Possible values:**
+  - `Wallet` - Paid from wallet balance
+  - `Paystack` - Paid via Paystack gateway
+</ResponseField>
+
+<ResponseField name="transactionId" type="string" required>
+  Internal transaction identifier
+  
+  - System-generated reference
+  - Links to delivery or payment record
+  - Example: `"txn_abc123"`
+</ResponseField>
+
+<ResponseField name="createdAt" type="datetime" required>
+  When the transaction was created
+  
+  - ISO 8601 format
+  - Example: `"2025-01-15T10:30:00.000Z"`
+</ResponseField>
+
+---
+
+## Field Exclusions
+
+The following fields exist in the database but are **excluded** from API responses:
+
+- `authId` - Internal user/driver ID
+- `role` - Internal role designation
+- `updatedAt` - Last update timestamp (not needed for transactions)
+
+---
+
+## Example Transaction Object
+
+### Debit Transaction (Payment)
+
+```json
+{
+  "id": "txn-123-456-789",
+  "type": "DEBIT",
+  "amount": 2500,
+  "reference": "order_12345_payment",
+  "paymentType": "Delivery Request",
+  "paymentChannel": "Wallet",
+  "transactionId": "txn_abc123",
+  "createdAt": "2025-01-15T10:30:00.000Z"
+}
+```
+
+### Credit Transaction (Deposit)
+
+```json
+{
+  "id": "txn-456-789-012",
+  "type": "CREDIT",
+  "amount": 100000,
+  "reference": "deposit_paystack_xyz",
+  "paymentType": "Fund Wallet",
+  "paymentChannel": "Paystack",
+  "transactionId": "txn_xyz789",
+  "createdAt": "2025-01-15T09:00:00.000Z"
+}
+```
+
+---
+
+## Transaction Types Explained
+
+### DEBIT Transactions
+
+Occur when money is deducted from your wallet:
+- Delivery payments
+- Pickup request payments
+- Service fees
+
+### CREDIT Transactions
+
+Occur when money is added to your wallet:
+- Wallet deposits via Paystack
+- Refunds
+- Promotional credits
+
+---
+
+## Payment Types
+
+| Payment Type | Description | Common Channel |
+|--------------|-------------|----------------|
+| `Fund Wallet` | Adding money to wallet | Paystack |
+| `Delivery Request` | Paying for delivery | Wallet |
+| `Delivery` | General delivery payment | Wallet |
+| `Pickup Request` | Pickup service payment | Wallet |
+| `Withdrawal` | Withdrawing from wallet | Wallet |
+
+---
+
+## Payment Channels
+
+| Channel | Description |
+|---------|-------------|
+| `Wallet` | Payment from wallet balance |
+| `Paystack` | Payment via Paystack gateway |
+
+---
+
+## Related Endpoints
+
+<CardGroup cols={2}>
+  <Card title="List Transactions" icon="list" href="/api-reference/payments/list-transactions">
+    Get paginated transaction history
+  </Card>
+  <Card title="Get Transaction" icon="receipt" href="/api-reference/payments/get-transaction">
+    Get details of a specific transaction
+  </Card>
+  <Card title="Charge Payment" icon="credit-card" href="/api-reference/payments/charge">
+    Process a new payment
+  </Card>
+</CardGroup>

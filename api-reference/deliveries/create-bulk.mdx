@@ -90,6 +90,9 @@ You must provide either `bulkId` OR `tempDeliveryIds`:
         <ResponseField name="order" type="number">
           Order position in the bulk
         </ResponseField>
+        <ResponseField name="orderCode" type="string">
+          Order code for the delivery (nullable)
+        </ResponseField>
       </Expandable>
     </ResponseField>
   </Expandable>
@@ -154,17 +157,20 @@ curl -X POST https://api.chidori.africa/enterprise-service/api/deliveries/create
       {
         "id": "abc123-def456-ghi789",
         "trackingId": "CHI-ABC123",
-        "order": 1
+        "order": 1,
+        "orderCode": null
       },
       {
         "id": "def456-ghi789-jkl012",
         "trackingId": "CHI-DEF456",
-        "order": 2
+        "order": 2,
+        "orderCode": null
       },
       {
         "id": "ghi789-jkl012-mno345",
         "trackingId": "CHI-GHI789",
-        "order": 3
+        "order": 3,
+        "orderCode": null
       }
     ]
   }
