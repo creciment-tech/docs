@@ -12,7 +12,7 @@ Chidori API keys support granular permissions, allowing you to control exactly w
 | Permission | Description | Required for |
 |------------|-------------|--------------|
 | `pricing:read` | Get delivery price estimates | `/api/pricing/single`, `/api/pricing/bulk` |
-| `delivery:create` | Create new deliveries | `/api/deliveries/create`, `/api/deliveries/create-bulk` |
+| `delivery:create` | Create and cancel deliveries | `/api/deliveries/create`, `/api/deliveries/create-bulk`, `/api/deliveries/cancel` |
 | `delivery:read` | View delivery details | `/api/deliveries/get`, `/api/deliveries/list` |
 | `payment:create` | Process payments | `/api/payments/charge` |
 | `payment:read` | View transaction history | `/api/payments/list-transactions`, `/api/payments/get-transaction` |
@@ -34,7 +34,7 @@ Required to calculate delivery costs before creating deliveries.
 delivery:create
 delivery:read
 ```
-- `delivery:create` - Create single or bulk deliveries
+- `delivery:create` - Create single or bulk deliveries (also required to cancel pending deliveries)
 - `delivery:read` - View and list your deliveries
 
 ### Payment permissions

@@ -52,7 +52,8 @@
               "api-reference/deliveries/create",
               "api-reference/deliveries/create-bulk",
               "api-reference/deliveries/get",
-              "api-reference/deliveries/list"
+              "api-reference/deliveries/list",
+              "api-reference/deliveries/cancel"
             ]
           },
           {
