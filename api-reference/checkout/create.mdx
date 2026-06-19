@@ -1,0 +1,223 @@
+---
+title: "Create Checkout"
+description: "Generate a Chidori-hosted pay-by-transfer checkout link for your customer"
+---
+
+## Overview
+
+Create a hosted checkout and get back a link to send your customer. On the Chidori-hosted page the customer picks a delivery address, the delivery fee is computed, and they pay by bank transfer. When payment lands, Chidori auto-creates the delivery and sends you a [`checkout.paid`](/api-reference/webhooks/overview) webhook.
+
+Two modes, chosen by whether you include `goods`:
+
+- **Delivery-only** — omit `goods`. The customer pays only the Chidori delivery fee.
+- **Goods + delivery** — include `goods`. The customer pays for your products plus delivery; your goods total settles directly to your bank via your Paystack subaccount. Requires a verified payment profile.
+
+<Note>
+  **Required permission:** `payment:charge`
+</Note>
+
+## Collecting for goods requires verification
+
+Including `goods` collects money for your **products** (not just delivery), which settles to **your** bank via your Paystack subaccount. To unlock this you must first have an **approved payment profile**:
+
+1. Submit your **CAC certificate image**, **NIN**, business name and **settlement bank account** (via the dashboard).
+2. Chidori reviews and verifies the submission; on approval a Paystack subaccount is created for you.
+3. Once your profile status is `verified`, `create-checkout` requests that include `goods` are accepted.
+
+Until then, including `goods` returns **`403`** with:
+
+```json
+{ "message": "Collecting for goods requires a verified payment profile. Complete verification first." }
+```
+
+<Info>
+  **Delivery-only checkouts need no verification** — omit `goods` and you can create checkouts immediately. Verification is required only to collect for goods.
+</Info>
+
+## Endpoint
+
+```
+POST /api/checkout/create-checkout
+```
+
+## Request
+
+### Headers
+
+<ParamField header="X-API-Key" type="string" required>
+  Your Chidori API key
+</ParamField>
+
+<ParamField header="Content-Type" type="string" required>
+  Must be `application/json`
+</ParamField>
+
+### Body parameters
+
+<ParamField body="businessName" type="string" required>
+  Your business name — shown on the checkout page and in customer emails.
+</ParamField>
+
+<ParamField body="customerEmail" type="string" required>
+  Customer email. The checkout link is emailed here, and so is the payment confirmation.
+</ParamField>
+
+<ParamField body="senderPhone" type="string" required>
+  Sender (pickup) contact phone.
+</ParamField>
+
+<ParamField body="pickupAddress" type="string" required>
+  Human-readable pickup address.
+</ParamField>
+
+<ParamField body="pickupLat" type="number" required>
+  Pickup latitude.
+</ParamField>
+
+<ParamField body="pickupLon" type="number" required>
+  Pickup longitude.
+</ParamField>
+
+<ParamField body="customerName" type="string">
+  Customer name (optional).
+</ParamField>
+
+<ParamField body="redirectUrl" type="string">
+  Where to send the customer after successful payment. Chidori appends `?reference=&checkout=&status=success`. If omitted, the page shows a success screen with a delivery-tracking link.
+</ParamField>
+
+<ParamField body="externalReference" type="string">
+  Your idempotency key. Re-using it returns the same checkout instead of creating a new one.
+</ParamField>
+
+<ParamField body="goods" type="array">
+  Line items to collect for. Omit for a delivery-only checkout.
+  <Expandable title="item">
+    <ParamField body="id" type="string">Your product/SKU id</ParamField>
+    <ParamField body="name" type="string" required>Item name</ParamField>
+    <ParamField body="quantity" type="number" required>Quantity (&gt; 0)</ParamField>
+    <ParamField body="price" type="number" required>Unit price in Naira</ParamField>
+  </Expandable>
+</ParamField>
+
+## Response
+
+<ResponseField name="status" type="boolean">
+  Always `true` for successful requests
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="properties">
+    <ResponseField name="token" type="string">
+      The checkout's public token
+    </ResponseField>
+    <ResponseField name="url" type="string">
+      The hosted checkout URL to send your customer (`https://chidori.africa/checkout/{token}`)
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Checkout status — `awaiting_address` for a new checkout
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.chidori.africa/enterprise-service/api/checkout/create-checkout \
+  -H "X-API-Key: sk_live_xxx.yyy" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "businessName": "Mama Ada Kitchen",
+    "customerEmail": "buyer@example.com",
+    "customerName": "Ada",
+    "senderPhone": "08012345678",
+    "pickupAddress": "5 Marina St, Lagos Island",
+    "pickupLat": 6.4541,
+    "pickupLon": 3.3947,
+    "externalReference": "order_12345",
+    "redirectUrl": "https://shop.example.com/thank-you",
+    "goods": [
+      { "id": "sku_1", "name": "Jollof platter", "quantity": 2, "price": 6000 }
+    ]
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.chidori.africa/enterprise-service/api/checkout/create-checkout', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': 'sk_live_xxx.yyy',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    businessName: 'Mama Ada Kitchen',
+    customerEmail: 'buyer@example.com',
+    senderPhone: '08012345678',
+    pickupAddress: '5 Marina St, Lagos Island',
+    pickupLat: 6.4541,
+    pickupLon: 3.3947,
+    externalReference: 'order_12345'
+  })
+});
+
+const data = await response.json();
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 Success
+{
+  "status": true,
+  "data": {
+    "token": "v9aQ2k7r...base64url",
+    "url": "https://chidori.africa/checkout/v9aQ2k7r...base64url",
+    "status": "awaiting_address"
+  }
+}
+```
+
+```json 403 Verification required
+{
+  "message": "Collecting for goods requires a verified payment profile. Complete verification first."
+}
+```
+</ResponseExample>
+
+## What happens next
+
+<Steps>
+  <Step title="Send the link">
+    Share `data.url` with your customer (Chidori also emails it to `customerEmail`).
+  </Step>
+  <Step title="Customer pays">
+    The customer enters their delivery address, gets a total, and pays by bank transfer on the hosted page.
+  </Step>
+  <Step title="You get notified">
+    On payment, Chidori auto-creates the delivery and sends a [`checkout.paid`](/api-reference/webhooks/overview) webhook. Reconcile using your `externalReference`.
+  </Step>
+</Steps>
+
+## Idempotency
+
+Pass an `externalReference` unique to the order. Re-sending `create-checkout` with the same reference returns the existing checkout rather than creating a duplicate.
+
+## Error handling
+
+| Status | Example message | Action |
+|--------|-----------------|--------|
+| `400` | `businessName is required` / `pickupLat and pickupLon are required` | Provide all required fields |
+| `400` | `Each goods item needs name, quantity > 0, and price >= 0` | Fix the `goods` items |
+| `401` | `Unauthorized` | Verify API key |
+| `403` | `Collecting for goods requires a verified payment profile. Complete verification first.` | Complete payment-profile verification |
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Webhooks" icon="bell" href="/api-reference/webhooks/overview">
+    Handle the `checkout.paid` event
+  </Card>
+  <Card title="Get Delivery" icon="truck" href="/api-reference/deliveries/get">
+    Track the auto-created delivery
+  </Card>
+</CardGroup>

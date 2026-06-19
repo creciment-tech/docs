@@ -44,7 +44,7 @@ POST /api/pricing/bulk
 </ParamField>
 
 <ParamField body="stops" type="array" required>
-  Array of destination coordinates
+  Array of destination coordinates (max 50)
   <Expandable title="item properties">
     <ParamField body="lat" type="number" required>
       Latitude of the stop
@@ -193,10 +193,10 @@ data = response.json()
 }
 ```
 
-```json 400 Location Out of Bounds
+```json 400 Validation Error
 {
   "status": false,
-  "message": "Location out of bounds"
+  "message": "Each stop must contain lat and lon numbers"
 }
 ```
 </ResponseExample>

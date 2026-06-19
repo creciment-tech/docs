@@ -169,13 +169,6 @@ data = response.json()
 }
 ```
 
-```json 400 Location Out of Bounds
-{
-  "status": false,
-  "message": "Location out of bounds"
-}
-```
-
 ```json 401 Unauthorized
 {
   "status": false,
@@ -195,7 +188,7 @@ data = response.json()
 
 | Status | Message | Description |
 |--------|---------|-------------|
-| `400` | Location out of bounds | Pickup or destination is outside the supported service area |
+| `400` | Validation error | A required field is missing or malformed |
 | `401` | Unauthorized | Invalid or missing API key |
 | `403` | Forbidden | API key lacks `pricing:read` permission |
 

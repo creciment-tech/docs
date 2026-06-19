@@ -57,6 +57,12 @@
             ]
           },
           {
+            "group": "Checkout",
+            "pages": [
+              "api-reference/checkout/create"
+            ]
+          },
+          {
             "group": "Payments",
             "pages": [
               "api-reference/payments/charge",

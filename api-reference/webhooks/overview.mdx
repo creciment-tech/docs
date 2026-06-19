@@ -28,9 +28,14 @@ Webhooks allow you to receive real-time HTTP notifications when a delivery statu
   </Step>
 </Steps>
 
-## Webhook event
+## Webhook events
 
-Chidori sends webhooks for the `delivery.status_changed` event when a delivery transitions between statuses.
+| Event | Fires when |
+|-------|-----------|
+| `delivery.status_changed` | A delivery transitions between statuses |
+| `checkout.paid` | A hosted checkout is paid (payment + reconciliation event) |
+
+Subscribe to the events you need when configuring your webhook in the dashboard.
 
 ### Delivery statuses
 
@@ -104,6 +109,39 @@ All webhook payloads follow this structure:
     </ResponseField>
   </Expandable>
 </ResponseField>
+
+## `checkout.paid` payload
+
+Sent when a customer completes payment on a hosted checkout. Use it to reconcile against your `externalReference` and to know fulfillment has started.
+
+```json
+{
+  "id": "evt_def789ghi012",
+  "event": "checkout.paid",
+  "timestamp": "2025-01-15T10:45:00.000Z",
+  "data": {
+    "checkoutId": "chk_abc123",
+    "externalReference": "order_12345",
+    "amount": 14200,
+    "currency": "NGN",
+    "paystackReference": "chk_9f8e7d6c5b4a",
+    "breakdown": { "goodsTotal": 12000, "deliveryFee": 1800, "processingFee": 400 },
+    "goods": [{ "id": "sku_1", "name": "Jollof platter", "quantity": 2, "price": 6000 }],
+    "subaccountCode": "ACCT_xxxxxxxx",
+    "deliveryId": "abc123-def456-ghi789",
+    "trackingId": "CHIABC123DEF",
+    "customer": { "email": "buyer@example.com", "name": "Ada" },
+    "receiver": { "phone": "2348012345678" },
+    "dropoffAddress": "12 Awolowo Rd, Ikoyi, Lagos",
+    "notes": "Call on arrival",
+    "paidAt": "2025-01-15T10:45:00.000Z"
+  }
+}
+```
+
+<Info>
+  In delivery-only checkouts `goods` is empty and `breakdown.goodsTotal` is 0. The delivery referenced by `deliveryId` is auto-created and already paid.
+</Info>
 
 ## Signature verification
 
