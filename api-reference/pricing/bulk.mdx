@@ -199,7 +199,24 @@ data = response.json()
   "message": "Each stop must contain lat and lon numbers"
 }
 ```
+
+```json 422 Out of service area
+{
+  "status": false,
+  "reason": "OUT_OF_SERVICE_AREA",
+  "message": "We're temporarily not delivering to this area yet."
+}
+```
 </ResponseExample>
+
+## Error codes
+
+| Status | Message | Description |
+|--------|---------|-------------|
+| `400` | Validation error | A required field is missing or malformed, or `stops` exceeds 50 |
+| `401` | Unauthorized | Invalid or missing API key |
+| `403` | Forbidden | API key lacks `pricing:read` permission |
+| `422` | Out of service area | The pickup or any stop falls outside the bike service area — the whole quote fails. Carries `reason: "OUT_OF_SERVICE_AREA"`. |
 
 ## Creating bulk deliveries
 

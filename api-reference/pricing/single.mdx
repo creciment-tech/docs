@@ -182,6 +182,14 @@ data = response.json()
   "message": "Missing required permission: pricing:read"
 }
 ```
+
+```json 422 Out of service area
+{
+  "status": false,
+  "reason": "OUT_OF_SERVICE_AREA",
+  "message": "We're temporarily not delivering to this area yet."
+}
+```
 </ResponseExample>
 
 ## Error codes
@@ -191,6 +199,7 @@ data = response.json()
 | `400` | Validation error | A required field is missing or malformed |
 | `401` | Unauthorized | Invalid or missing API key |
 | `403` | Forbidden | API key lacks `pricing:read` permission |
+| `422` | Out of service area | Pickup or destination falls outside the bike service area. Carries `reason: "OUT_OF_SERVICE_AREA"`. |
 
 ## Next steps
 
